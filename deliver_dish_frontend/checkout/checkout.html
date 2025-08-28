@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>结算订单 - 美食送</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="javascript:history.back()" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回
+            </a>
+            <h1>订单结算</h1>
+            <div></div> <!-- 占位元素 -->
+        </div>
+        
+        <!-- 配送地址 -->
+        <div class="section" id="addressSection">
+            <div class="section-title">
+                <span>配送地址</span>
+                <button class="edit-btn" id="editAddressBtn">修改</button>
+            </div>
+            <div class="address-info" id="addressInfo">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="address-details">
+                    <div class="contact">
+                        <span class="contact-name" id="contactName">加载中...</span>
+                        <span class="contact-phone" id="contactPhone"></span>
+                    </div>
+                    <div class="address-text" id="addressText"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 订单详情 -->
+        <div class="section">
+            <div class="section-title">
+                <span>订单详情</span>
+            </div>
+            <div id="orderItems">
+                <!-- 订单项将通过JS动态加载 -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> 加载中...
+                </div>
+            </div>
+            
+            <div class="price-detail">
+                <span class="price-label">商品金额</span>
+                <span class="price-value" id="itemsPrice">¥0</span>
+            </div>
+            <div class="price-detail">
+                <span class="price-label">配送费</span>
+                <span class="price-value" id="deliveryFee">¥0</span>
+            </div>
+            
+            <div class="total-price">
+                <span>合计</span>
+                <span id="totalPrice">¥0</span>
+            </div>
+        </div>
+        
+        <!-- 支付方式 -->
+        <div class="section">
+            <div class="section-title">
+                <span>支付方式</span>
+            </div>
+            <div class="payment-methods">
+                <label class="payment-method">
+                    <input type="radio" name="payment" value="alipay" checked>
+                    <div class="payment-icon"><i class="fab fa-alipay" style="color: #1677ff;"></i></div>
+                    <span class="payment-name">支付宝</span>
+                </label>
+                <label class="payment-method">
+                    <input type="radio" name="payment" value="wechat">
+                    <div class="payment-icon"><i class="fab fa-weixin" style="color: #07c160;"></i></div>
+                    <span class="payment-name">微信支付</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部结算栏 -->
+    <div class="footer">
+        <div class="footer-total" id="footerTotal">¥0</div>
+        <button class="submit-btn" id="submitOrderBtn" disabled>提交订单</button>
+    </div>
+
+    <script src="checkout.js"></script>
+</body>
+</html>

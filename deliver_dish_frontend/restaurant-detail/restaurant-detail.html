@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>餐馆详情 - 美食送</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="restaurant-detail.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="home.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回首页
+            </a>
+            <h1>餐馆详情</h1>
+            <div></div> <!-- 占位元素 -->
+        </div>
+        
+        <!-- 餐馆头部信息 -->
+        <div class="restaurant-header">
+            <h1 class="restaurant-name" id="restaurantName">加载中...</h1>
+            <div class="restaurant-meta">
+                <div class="rating" id="restaurantRating">★★★★☆ 0.0</div>
+                <div class="delivery-info">
+                    <div class="info-item">
+                        <i class="fas fa-truck"></i>
+                        <span id="deliveryFee">配送费 ¥0</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="deliveryTime">0分钟</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-yuan-sign"></i>
+                        <span id="minOrder">起送 ¥0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 菜品分类导航 -->
+        <div class="category-nav">
+            <div class="category-list" id="categoryList">
+                <!-- 分类将通过JS动态加载 -->
+            </div>
+        </div>
+        
+        <!-- 菜品列表 -->
+        <div class="dishes-container" id="dishesContainer">
+            <div class="loading" id="loadingIndicator">
+                <i class="fas fa-spinner fa-spin"></i> 加载中...
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部购物车 -->
+    <div class="cart-bar" id="cartBar">
+        <div class="cart-content">
+            <div class="cart-info">
+                <div class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="cart-badge" id="cartBadge">0</div>
+                </div>
+                <div class="cart-total" id="cartTotal">¥0</div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" disabled>去结算</button>
+        </div>
+    </div>
+
+    <script src="restaurant-detail.js"></script>
+</body>
+</html>

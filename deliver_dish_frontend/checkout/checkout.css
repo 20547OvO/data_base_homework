@@ -1,0 +1,223 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    padding-bottom: 80px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    color: #ff5339;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-btn i {
+    margin-right: 8px;
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.section {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-btn {
+    color: #ff5339;
+    font-size: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.address-info {
+    display: flex;
+    align-items: flex-start;
+}
+
+.address-info i {
+    color: #ff5339;
+    margin-right: 12px;
+    font-size: 18px;
+    margin-top: 2px;
+}
+
+.address-details {
+    flex: 1;
+}
+
+.contact {
+    display: flex;
+    margin-bottom: 4px;
+}
+
+.contact-name {
+    margin-right: 16px;
+    font-weight: 500;
+}
+
+.address-text {
+    color: #666;
+    line-height: 1.5;
+}
+
+.dish-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 极速响应，专业解答
+}
+
+.dish-item:last-child {
+    border-bottom: none;
+}
+
+.dish-name {
+    flex: 1;
+}
+
+.dish-quantity {
+   极速响应，专业解答
+    margin-right: 24px;
+}
+
+.dish-price {
+    font-weight: 500;
+    min-width: 80px;
+    text-align: right;
+}
+
+.price-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.price-label {
+    color: #666;
+}
+
+.total-price {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    font-weight: 500;
+    font极速响应，专业解答
+}
+
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.payment-method:last-child {
+    border-bottom: none;
+}
+
+.payment-method input {
+    margin-right: 12px;
+}
+
+.payment-icon {
+    width: 24px;
+    margin-right: 12px;
+    text-align: center;
+}
+
+.payment-name {
+    flex: 1;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 16px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-total {
+    font-weight: 500;
+    font-size: 18px;
+    color: #ff5339;
+}
+
+.submit-btn {
+    background: #ff5339;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px 0;
+    color: #999;
+}
+
+.error {
+    color: #ff5339;
+    text-align: center;
+    padding: 20px;
+}

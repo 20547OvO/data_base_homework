@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>注册</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>注册</h2>
+    <form id="registerForm">
+      <input type="text" id="regUsername" placeholder="用户名" required />
+      <input type="password" id="regPassword" placeholder="密码" required />
+	  <select id="role" required>
+	          <option value="">-- 请选择角色 --</option>
+	          <option value="customer">顾客</option>
+	          <option value="rider">骑手</option>
+	  </select>
+      <button type="submit">注册</button>
+    </form>
+    <p id="regMsg" style="color:red;"></p>
+    <a href="../login/login.html">已有账号？去登录</a>
+  </div>
+
+  <script src="register.js"></script>
+</body>
+</html>
