@@ -129,12 +129,9 @@ async function loadCurrentOrders() {
 	if (response.ok) {
 	  console.log("开始打印数据1111111");
 	  const orders = await response.json();
-	  console.log("完整响应:", orders); // 打印完整响应
-	  console.log("响应状态:", orders.success); // 检查success字段
-	  console.log("响应消息:", orders.message); // 检查message字段
-	  console.log("订单数据:", orders.data); // 直接打印data对象
-	  console.log("JSON格式订单数据:", JSON.stringify(orders.data)); // 打印JSON字符串
-	  displayCurrentOrders(orders);
+	  console.log("完整响应:", orders.data); // 打印完整响应
+	  
+	  displayCurrentOrders(orders.data);
 	} else {
 	  console.error("请求失败:", response.status);
 	}
@@ -167,15 +164,16 @@ function displayCurrentOrders(orders) {
   orders.forEach(order => {
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
+	const totalItemCount = order.items.reduce((total, item) => total + item.quantity, 0);
     
     orderCard.innerHTML = `
       <div class="order-header">
-        <div class="order-id">订单号: #${order.id}</div>
+        <div class="order-id">订单号: #${order.orderId}</div>
         <div class="order-status status-${order.status}">${getStatusText(order.status)}</div>
       </div>
       <div class="order-details">
         <div class="order-restaurant">${order.restaurantName}</div>
-        <div class="order-items">${order.itemCount}件商品</div>
+        <div class="order-items">${totalItemCount}件商品</div>
         <div class="order-price">¥${order.totalPrice.toFixed(2)}</div>
       </div>
     `;
@@ -258,7 +256,7 @@ function viewRestaurant(restaurantId) {
 // 退出登录
 function logout() {
   localStorage.removeItem("user");
-  window.location.href = "login.html";
+  window.location.href = "../login/login.html";
 }
 
 // 辅助函数 - 获取星级评分显示

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>骑手接单中心</title>
+		<link rel="stylesheet" href="rider_home.css">
+	</head>
+	<body>
+		<header class="header">
+			<h1>骑手接单中心</h1>
+			<div class="rider-info">
+				<span class="rider-name" id="riderName">骑手: 加载中...</span>
+				<button class="logout-btn" id="logoutBtn">退出登录</button>
+			</div>
+		</header>
+		
+		<div class="container">
+			<!-- 左侧：可接订单 -->
+			<div class="column">
+				<h2>可接订单 <span id="availableOrdersCount">(0)</span></h2>
+				<div id="availableOrdersList">
+					<!-- 动态生成的订单将在这里显示 -->
+				</div>
+			</div>
+			
+			<!-- 右侧：我的任务 -->
+			<div class="column">
+				<h2>我的任务 <span id="myTasksCount">(0)</span></h2>
+				<div id="myTasksList">
+					<!-- 动态生成的任务将在这里显示 -->
+				</div>
+			</div>
+		</div>
+
+		<!-- 订单详情模态框 -->
+		<div id="orderModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<h2 id="modalTitle">订单详情</h2>
+				<div id="modalBody">
+					<!-- 订单详情内容 -->
+				</div>
+			</div>
+		</div>
+
+		<script src="rider_home.js"></script>
+	</body>
+</html>

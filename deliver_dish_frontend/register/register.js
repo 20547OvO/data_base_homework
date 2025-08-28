@@ -22,7 +22,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
 
     if (data.success) {
       alert("注册成功，现在去登录");
-      window.location.href = "login.html";
+      window.location.href = "../login/login.html";
     }
   } catch (error) {
     console.error(error);

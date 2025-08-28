@@ -25,7 +25,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 	         window.location.href = "../home/home.html"; // 顾客主页
 	     } 
 	     else if (data.role == "rider") {
-	         window.location.href = "rider_home.html"; // 骑手主页
+	         window.location.href = "../rider_home/rider_home.html"; // 骑手主页
 	     } 
 	     else if (data.role == "admin") {
 	         window.location.href = "admin_home.html"; // 管理员主页

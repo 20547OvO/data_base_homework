@@ -55,6 +55,7 @@ public class OrderService {
             dto.setStatus(order.getStatus().name());
             dto.setRestaurantName(order.getRestaurant().getName());
             dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setTotalPrice(order.getTotalPrice());
             // ✅ 转换 OrderItem -> OrderItemDTO
             List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
                 OrderItemDTO itemDTO = new OrderItemDTO();
