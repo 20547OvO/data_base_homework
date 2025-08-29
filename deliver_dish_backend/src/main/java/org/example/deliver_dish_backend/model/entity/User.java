@@ -19,6 +19,6 @@ public class User {
     private Role role;
 
     public enum Role {
-        customer, rider, admin
+        customer, rider, admin,owner
     }
 }

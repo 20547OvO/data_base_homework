@@ -1,3 +1,9 @@
+// const userId = localStorage.getItem('user_id');
+//     if (!userId) {
+//         showError('用户未登录，请先登录');
+//         window.location.href = '../login/login.html';
+//         return;
+//     };
 // 页面加载时执行
 document.addEventListener('DOMContentLoaded', function() {
   // 检查用户登录状态
@@ -5,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // if (user) {
   //   document.getElementById("username").innerText = user.username;
   //   // 加载初始数据
+    const username = localStorage.getItem('user_name');
+	console.log("加载到home界面的username为"+username);
+	document.getElementById('username').textContent = username || '游客';
     loadRestaurants();
     loadCurrentOrders();
     loadHistoryOrders();
@@ -185,22 +194,27 @@ function displayCurrentOrders(orders) {
 // 加载历史订单
 async function loadHistoryOrders() {
   try {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+        showError('用户未登录，请先登录');
+        window.location.href = '../login/login.html';
+        return;
+    };
     const timeRange = document.getElementById('timeRange').value;
     const restaurantFilter = document.getElementById('restaurantFilter').value;
     
     const response = await fetch(
-      `http://localhost:8080/api/orders/history?userId=${user.userId}&timeRange=${timeRange}&restaurantId=${restaurantFilter}`, 
+      `http://localhost:8080/api/orders/customer/${userId}/history`, 
       {
         headers: {
-          'Authorization': `Bearer ${user.token}`
+          // 'Authorization': `Bearer ${user.token}`
         }
       }
     );
     
     if (response.ok) {
       const orders = await response.json();
-      displayHistoryOrders(orders);
+      displayHistoryOrders(orders.data);
     } else {
       console.error('获取历史订单失败');
     }
@@ -224,15 +238,16 @@ function displayHistoryOrders(orders) {
   orders.forEach(order => {
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
+	const totalItemCount = order.items.reduce((total, item) => total + item.quantity, 0);
     
     orderCard.innerHTML = `
       <div class="order-header">
-        <div class="order-id">订单号: #${order.id}</div>
+        <div class="order-id">订单号: #${order.orderId}</div>
         <div class="order-status status-${order.status}">${getStatusText(order.status)}</div>
       </div>
       <div class="order-details">
         <div class="order-restaurant">${order.restaurantName}</div>
-        <div class="order-items">${order.itemCount}件商品</div>
+        <div class="order-items">${totalItemCount}件商品</div>
         <div class="order-price">¥${order.totalPrice.toFixed(2)}</div>
       </div>
       <div class="order-time">下单时间: ${formatDate(order.createTime)}</div>
@@ -255,7 +270,8 @@ function viewRestaurant(restaurantId) {
 
 // 退出登录
 function logout() {
-  localStorage.removeItem("user");
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("user_name");
   window.location.href = "../login/login.html";
 }
 

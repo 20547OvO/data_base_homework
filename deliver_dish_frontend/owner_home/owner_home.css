@@ -1,0 +1,351 @@
+:root {
+	--primary-color: #42b983;
+	--secondary-color: #3498db;
+	--danger-color: #e74c3c;
+	--warning-color: #f39c12;
+	--success-color: #2ecc71;
+	--light-gray: #f5f5f5;
+	--dark-gray: #333;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: 'Arial', sans-serif;
+	background-color: #f9f9f9;
+	color: #333;
+	line-height: 1.6;
+}
+
+.header {
+	background-color: white;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+	padding: 15px 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.header h1 {
+	color: var(--primary-color);
+	font-size: 1.8rem;
+}
+
+.container {
+	display: flex;
+	max-width: 1400px;
+	margin: 0 auto;
+	gap: 20px;
+	padding: 0 15px;
+}
+
+.column {
+	flex: 1;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+	padding: 20px;
+	height: fit-content;
+	min-width: 0; /* 允许列收缩 */
+}
+
+.column h2 {
+	margin-bottom: 15px;
+	padding-bottom: 10px;
+	border-bottom: 2px solid var(--light-gray);
+	color: var(--dark-gray);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.count-badge {
+	background-color: var(--primary-color);
+	color: white;
+	border-radius: 12px;
+	padding: 2px 10px;
+	font-size: 0.9rem;
+}
+
+.card {
+	border: 1px solid #eee;
+	border-radius: 6px;
+	padding: 15px;
+	margin-bottom: 15px;
+	background: white;
+	transition: transform 0.2s;
+}
+
+.card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.card-title {
+	font-weight: bold;
+	color: var(--dark-gray);
+	font-size: 1.2rem;
+}
+
+.card-content {
+	color: #555;
+	margin-bottom: 10px;
+	font-size: 0.95rem;
+}
+
+.card-content p {
+	margin-bottom: 5px;
+}
+
+.card-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding-top: 10px;
+	border-top: 1px dashed #eee;
+}
+
+.btn {
+	padding: 8px 15px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: bold;
+	transition: all 0.3s;
+}
+
+.btn-primary {
+	background-color: var(--primary-color);
+	color: white;
+}
+
+.btn-primary:hover {
+	background-color: #379869;
+}
+
+.btn-danger {
+	background-color: var(--danger-color);
+	color: white;
+	padding: 5px 10px;
+	font-size: 0.9rem;
+}
+
+.btn-danger:hover {
+	background-color: #c0392b;
+}
+
+.btn-secondary {
+	background-color: var(--secondary-color);
+	color: white;
+}
+
+.btn-secondary:hover {
+	background-color: #2980b9;
+}
+
+.btn-warning {
+	background-color: var(--warning-color);
+	color: white;
+}
+
+.btn-warning:hover {
+	background-color: #e67e22;
+}
+
+.empty-state {
+	text-align: center;
+	padding: 30px 0;
+	color: #999;
+}
+
+.empty-state i {
+	font-size: 3rem;
+	margin-bottom: 15px;
+	display: block;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 1000;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+	background-color: #fefefe;
+	margin: 10% auto;
+	padding: 20px;
+	border-radius: 8px;
+	width: 90%;
+	max-width: 500px;
+	position: relative;
+}
+
+.close {
+	color: #aaa;
+	float: right;
+	font-size: 28px;
+	font-weight: bold;
+	position: absolute;
+	right: 20px;
+	top: 10px;
+	cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+	color: black;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.modal-header {
+	margin-bottom: 15px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+.form-group {
+	margin-bottom: 15px;
+}
+
+label {
+	display: block;
+	margin-bottom: 5px;
+	font-weight: bold;
+	color: #555;
+}
+
+input, textarea, select {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+	outline: none;
+	border-color: var(--primary-color);
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.restaurant-card.selected {
+	border-left: 4px solid var(--primary-color);
+}
+
+.status-badge {
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-size: 0.8rem;
+	font-weight: bold;
+}
+
+.status-created {
+	background-color: #f0f0f0;
+	color: #555;
+}
+
+.status-accepted {
+	background-color: #e3f2fd;
+	color: #1565c0;
+}
+
+.status-delivering {
+	background-color: #fff8e1;
+	color: #f57f17;
+}
+
+.status-completed {
+	background-color: #e8f5e9;
+	color: #2e7d32;
+}
+
+.status-cancelled {
+	background-color: #ffebee;
+	color: #c62828;
+}
+
+.order-items {
+	margin-top: 10px;
+	padding: 10px;
+	background-color: var(--light-gray);
+	border-radius: 4px;
+}
+
+.order-item {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 5px;
+	font-size: 0.9rem;
+}
+
+.refresh-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1.2rem;
+	color: #999;
+	margin-left: 10px;
+}
+
+.refresh-btn:hover {
+	color: var(--primary-color);
+}
+
+.loading {
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.loading::after {
+	content: "加载中...";
+	display: block;
+	text-align: center;
+	padding: 10px;
+}
+
+@media (max-width: 1200px) {
+	.container {
+		flex-wrap: wrap;
+	}
+	
+	.column {
+		flex: 1 1 300px;
+		margin-bottom: 20px;
+	}
+}
+
+@media (max-width: 768px) {
+	.container {
+		flex-direction: column;
+	}
+	
+	.modal-content {
+		width: 95%;
+		margin: 5% auto;
+	}
+}

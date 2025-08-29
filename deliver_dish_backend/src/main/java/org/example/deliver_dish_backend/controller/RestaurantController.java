@@ -1,12 +1,15 @@
 package org.example.deliver_dish_backend.controller;
 
+import org.apache.tomcat.util.json.JSONParser;
 import org.example.deliver_dish_backend.model.dto.ApiResponse;
+import org.example.deliver_dish_backend.model.dto.RestaurantRequest;
 import org.example.deliver_dish_backend.model.entity.Restaurant;
 import org.example.deliver_dish_backend.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +39,17 @@ public class RestaurantController {
         }
     }
 
+    // 新增接口：通过 ownerId 查询餐厅
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<?> getRestaurantsByOwnerId(@PathVariable Long ownerId) {
+        List<Restaurant> restaurants = restaurantService.getRestaurantsByOwnerId(ownerId);
+        if (!restaurants.isEmpty()) {
+            return ResponseEntity.ok(ApiResponse.success("查询成功", restaurants));
+        } else {
+            return ResponseEntity.ok(ApiResponse.success("该用户暂无餐厅", Collections.emptyList()));
+        }
+    }
+
     @GetMapping("/search")
     public ResponseEntity<?> searchRestaurants(@RequestParam String keyword) {
         List<Restaurant> restaurants = restaurantService.searchRestaurants(keyword);
@@ -43,9 +57,20 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createRestaurant(@RequestBody Restaurant restaurant) {
-        Restaurant newRestaurant = restaurantService.createRestaurant(restaurant);
-        return ResponseEntity.ok(ApiResponse.success("创建成功", newRestaurant));
+    public ResponseEntity<?> createRestaurant(@RequestBody RestaurantRequest request) {
+        try {
+            System.out.println("aaaacreaterestaurant"+ request);
+            System.out.println("aaaacreaterestaurant - name: " + request.getName());
+            System.out.println("aaaacreaterestaurant - address: " + request.getAddress());
+            System.out.println("aaaacreaterestaurant - phone: " + request.getPhone());
+            System.out.println("aaaacreaterestaurant - description: " + request.getDescription());
+            System.out.println("aaaacreaterestaurant - ownerId: " + request.getOwnerId());
+            Restaurant newRestaurant = restaurantService.createRestaurant(request);
+            System.out.println("aaaacreaterestaurantsuccess");
+            return ResponseEntity.ok(ApiResponse.success("创建成功", newRestaurant));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("创建失败: " + e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")

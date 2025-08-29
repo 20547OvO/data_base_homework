@@ -24,7 +24,7 @@ public class Order {
     private User rider;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status = OrderStatus.created;
+    private OrderStatus status = OrderStatus.CREATED;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal totalPrice;
@@ -36,7 +36,7 @@ public class Order {
     private List<OrderItem> items;
 
     public enum OrderStatus {
-        created, ACCEPTED, DELIVERING, COMPLETED, CANCELLED
+        CREATED, ACCEPTED, DELIVERING, COMPLETED, CANCELLED
     }
 
     // 构造方法

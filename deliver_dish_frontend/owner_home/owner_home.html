@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>餐馆管理系统</title>
+		<link rel="stylesheet" href="owner_home.css">
+	</head>
+	<body>
+		<header class="header">
+			<h1>餐馆管理系统</h1>
+			<div>
+				<button class="btn btn-secondary" id="refreshAllBtn">刷新数据</button>
+			</div>
+		</header>
+		
+		<div class="container">
+			<!-- 左侧：餐馆管理 -->
+			<div class="column">
+				<h2>
+					餐馆管理 
+					<span class="count-badge" id="restaurantsCount">0</span>
+					<button class="btn btn-primary" id="addRestaurantBtn">添加餐馆</button>
+				</h2>
+				<div id="restaurantsList">
+					<div class="empty-state">
+						<i>🏪</i>
+						<p>加载中...</p>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 中间：菜品管理 -->
+			<div class="column">
+				<h2>
+					菜品管理 
+					<span class="count-badge" id="dishesCount">0</span>
+					<button class="btn btn-primary" id="addDishBtn" disabled>添加菜品</button>
+				</h2>
+				<div id="dishesList">
+					<div class="empty-state">
+						<i>🍲</i>
+						<p>请先选择餐馆</p>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 右侧：订单管理 -->
+			<div class="column">
+				<h2>
+					订单管理 
+					<span class="count-badge" id="ordersCount">0</span>
+					<button class="refresh-btn" id="refreshOrdersBtn" title="刷新订单">🔄</button>
+				</h2>
+				<div id="ordersFilter">
+					<select id="orderStatusFilter">
+						<option value="all">所有状态</option>
+						<option value="created">已创建</option>
+						<option value="accepted">已接受</option>
+						<option value="delivering">配送中</option>
+						<option value="completed">已完成</option>
+						<option value="cancelled">已取消</option>
+					</select>
+				</div>
+				<div id="ordersList">
+					<div class="empty-state">
+						<i>📦</i>
+						<p>请先选择餐馆</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 添加餐馆模态框 -->
+		<div id="restaurantModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<div class="modal-header">
+					<h2>添加新餐馆</h2>
+				</div>
+				<form id="restaurantForm">
+					<div class="form-group">
+						<label for="restaurantName">餐馆名称</label>
+						<input type="text" id="restaurantName" required placeholder="请输入餐馆名称">
+					</div>
+					<div class="form-group">
+						<label for="restaurantAddress">地址</label>
+						<input type="text" id="restaurantAddress" required placeholder="请输入餐馆地址">
+					</div>
+					<div class="form-group">
+						<label for="restaurantPhone">联系电话</label>
+						<input type="tel" id="restaurantPhone" required placeholder="请输入联系电话">
+					</div>
+					<div class="form-group">
+						<label for="restaurantDescription">餐馆描述</label>
+						<textarea id="restaurantDescription" rows="3" placeholder="请输入餐馆描述"></textarea>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn" id="cancelRestaurantBtn">取消</button>
+						<button type="submit" class="btn btn-primary">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		
+		<!-- 添加菜品模态框 -->
+		<div id="dishModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<div class="modal-header">
+					<h2>添加新菜品</h2>
+				</div>
+				<form id="dishForm">
+					<div class="form-group">
+						<label for="dishName">菜品名称</label>
+						<input type="text" id="dishName" required placeholder="请输入菜品名称">
+					</div>
+					<div class="form-group">
+						<label for="dishPrice">价格 (¥)</label>
+						<input type="number" id="dishPrice" min="0" step="0.01" required placeholder="请输入价格">
+					</div>
+					<div class="form-group">
+						<label for="dishStock">库存</label>
+						<input type="number" id="dishStock" min="0" value="100" required placeholder="请输入库存数量">
+					</div>
+					<div class="form-group">
+						<label for="dishDescription">菜品描述</label>
+						<textarea id="dishDescription" rows="3" placeholder="请输入菜品描述"></textarea>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn" id="cancelDishBtn">取消</button>
+						<button type="submit" class="btn btn-primary">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<script src="owner_home.js"></script>
+	</body>
+</html>

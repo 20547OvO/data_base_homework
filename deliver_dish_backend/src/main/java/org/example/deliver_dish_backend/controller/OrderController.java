@@ -26,6 +26,34 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
     }
 
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getOrdersByStatus(@PathVariable String status) {
+        try {
+            // 将字符串转换为枚举，忽略大小写
+            System.out.println("aaabbcccstatusstarta" + status);
+            Order.OrderStatus orderStatus = Order.OrderStatus.valueOf(status.toUpperCase());
+            //检测是否正确枚举值，已经拿到created的状态值
+            System.out.println("aaaabbb111" + orderStatus);
+            List<OrderDTO> orders = orderService.getOrdersByStatus(orderStatus);
+            System.out.println("aaaabbb" + orders);
+            return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("无效的订单状态"));
+        }
+    }
+
+//    @GetMapping
+//    public ResponseEntity<?> getOrders(@RequestParam(required = false) String status) {
+//        List<Order> orders;
+//        if ("created".equals(status)) {
+////            orders = orderService.getOrdersByStatus(Order.OrderStatus.created);
+//        } else {
+//            orders = orderService.getAllOrders();
+//        }
+//        return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
+//    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderById(@PathVariable Long id) {
         Optional<Order> order = orderService.getOrderById(id);
@@ -53,7 +81,9 @@ public class OrderController {
 
     @GetMapping("/customer/{customerId}/history")
     public ResponseEntity<?> getHistoryOrdersByCustomerId(@PathVariable Long customerId) {
-        List<Order> orders = orderService.getHistoryOrdersByCustomerId(customerId);
+        System.out.println("aaaastartuserresutrunt9999");
+        List<OrderDTO> orders = orderService.getHistoryOrdersByCustomerId(customerId);
+        System.out.println(orders);
         return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
     }
 
@@ -65,7 +95,8 @@ public class OrderController {
 
     @GetMapping("/rider/{riderId}")
     public ResponseEntity<?> getOrdersByRiderId(@PathVariable Long riderId) {
-        List<Order> orders = orderService.getOrdersByRiderId(riderId);
+        List<OrderDTO> orders = orderService.getOrdersByRiderId(riderId);
+        System.out.println("aaaaariderstatrt" + orders);
         return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
     }
 
@@ -83,22 +114,21 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId, @RequestParam Order.OrderStatus status) {
-        Order updatedOrder = orderService.updateOrderStatus(orderId, status);
+    public ResponseEntity<?> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam Order.OrderStatus status,
+            @RequestParam(required = false) Long riderId // 可选的 riderId 参数
+    ) {
+        // 实现逻辑
+        System.out.println("bbbbbaaaastartstatue");
+        Order updatedOrder = orderService.updateOrderStatus(orderId, status, riderId);
         if (updatedOrder != null) {
             return ResponseEntity.ok(ApiResponse.success("状态更新成功", updatedOrder));
         } else {
             return ResponseEntity.badRequest().body(ApiResponse.error("订单不存在"));
-        }
-    }
 
-//    @PutMapping("/{orderId}/assign-rider")
-//    public ResponseEntity<?> assignRider(@PathVariable Long orderId, @RequestParam Long riderId) {
-//        Order updatedOrder = orderService.assignRider(orderId, riderId);
-//        if (updatedOrder != null) {
-//            return ResponseEntity.ok(ApiResponse.success("骑手分配成功", updatedOrder));
-//        } else {
-//            return ResponseEntity.badRequest().body(ApiResponse.error("分配失败，请检查订单和骑手信息"));
-//        }
-//    }
+        }
+
+
+    }
 }

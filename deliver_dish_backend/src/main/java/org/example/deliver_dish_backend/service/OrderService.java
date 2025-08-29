@@ -46,7 +46,7 @@ public class OrderService {
     public List<OrderDTO> getCurrentOrdersByCustomerId(Long customerId) {
         List<Order> orders = orderRepository.findByCustomer_UserIdAndStatusIn(
                 customerId,
-                List.of(Order.OrderStatus.created, Order.OrderStatus.ACCEPTED, Order.OrderStatus.DELIVERING)
+                List.of(Order.OrderStatus.CREATED, Order.OrderStatus.ACCEPTED, Order.OrderStatus.DELIVERING)
         );
 
         return orders.stream().map(order -> {
@@ -72,19 +72,84 @@ public class OrderService {
     }
 
 
-    public List<Order> getHistoryOrdersByCustomerId(Long customerId) {
-        return orderRepository.findByCustomer_UserIdAndStatusIn(
+    public List<OrderDTO> getHistoryOrdersByCustomerId(Long customerId) {
+        List<Order> orders = orderRepository.findByCustomer_UserIdAndStatusIn(
                 customerId,
                 List.of(Order.OrderStatus.COMPLETED, Order.OrderStatus.CANCELLED)
         );
+        return orders.stream().map(order -> {
+            OrderDTO dto = new OrderDTO();
+            dto.setOrderId(order.getOrderId());
+            dto.setStatus(order.getStatus().name());
+            dto.setRestaurantName(order.getRestaurant().getName());
+            dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setTotalPrice(order.getTotalPrice());
+            dto.setCreateTime(LocalDateTime.now());
+            // ✅ 转换 OrderItem -> OrderItemDTO
+            List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setItemId(item.getItemId());
+                itemDTO.setDishName(item.getDish().getName());
+                itemDTO.setQuantity(item.getQuantity());
+                itemDTO.setPrice(item.getPrice());
+                return itemDTO;
+            }).collect(Collectors.toList());
+
+            dto.setItems(itemDTOs);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+    public List<OrderDTO> getOrdersByStatus(Order.OrderStatus status) {
+        List<Order> orders=orderRepository.findByStatus(status);
+        return orders.stream().map(order -> {
+            OrderDTO dto = new OrderDTO();
+            dto.setOrderId(order.getOrderId());
+            dto.setStatus(order.getStatus().name());
+            dto.setRestaurantName(order.getRestaurant().getName());
+            dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setTotalPrice(order.getTotalPrice());
+            // ✅ 转换 OrderItem -> OrderItemDTO
+            List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setItemId(item.getItemId());
+                itemDTO.setDishName(item.getDish().getName());
+                itemDTO.setQuantity(item.getQuantity());
+                itemDTO.setPrice(item.getPrice());
+                return itemDTO;
+            }).collect(Collectors.toList());
+
+            dto.setItems(itemDTOs);
+            return dto;
+        }).collect(Collectors.toList());
+//        return orderRepository.findByStatus(status);
     }
 
     public List<Order> getOrdersByRestaurantId(Long restaurantId) {
         return orderRepository.findByRestaurant_RestaurantId(restaurantId);
     }
 
-    public List<Order> getOrdersByRiderId(Long riderId) {
-        return orderRepository.findByRider_UserId(riderId);
+    public List<OrderDTO> getOrdersByRiderId(Long riderId) {
+        List<Order> orders=orderRepository.findByRider_UserId(riderId);
+        return orders.stream().map(order -> {
+            OrderDTO dto = new OrderDTO();
+            dto.setOrderId(order.getOrderId());
+            dto.setStatus(order.getStatus().name());
+            dto.setRestaurantName(order.getRestaurant().getName());
+            dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setTotalPrice(order.getTotalPrice());
+            // ✅ 转换 OrderItem -> OrderItemDTO
+            List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setItemId(item.getItemId());
+                itemDTO.setDishName(item.getDish().getName());
+                itemDTO.setQuantity(item.getQuantity());
+                itemDTO.setPrice(item.getPrice());
+                return itemDTO;
+            }).collect(Collectors.toList());
+
+            dto.setItems(itemDTOs);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public List<OrderItem> getOrderItemsByOrderId(Long orderId) {
@@ -108,7 +173,7 @@ public class OrderService {
         Order order = new Order();
         order.setCustomer(customer);
         order.setRestaurant(restaurant);
-        order.setStatus(Order.OrderStatus.created);
+        order.setStatus(Order.OrderStatus.CREATED);
         order.setCreateTime(LocalDateTime.now());
 
         // 保存订单（先保存订单以获取ID）
@@ -142,9 +207,24 @@ public class OrderService {
         savedOrder.setTotalPrice(totalPrice);
         return orderRepository.save(savedOrder);
     }
-    public Order updateOrderStatus(Long orderId, Order.OrderStatus status) {
+    public Order updateOrderStatus(Long orderId, Order.OrderStatus status, Long riderId) {
         return orderRepository.findById(orderId).map(order -> {
             order.setStatus(status);
+
+            // 如果有 riderId，则更新骑手信息
+            if (riderId != null) {
+                // 查找骑手用户
+                User rider = userRepository.findById(riderId)
+                        .orElseThrow(() -> new RuntimeException("骑手不存在，ID: " + riderId));
+
+                // 确保用户是骑手角色
+                if (rider.getRole() != User.Role.rider) {
+                    throw new RuntimeException("用户不是骑手，ID: " + riderId);
+                }
+
+                order.setRider(rider);
+            }
+
             return orderRepository.save(order);
         }).orElse(null);
     }

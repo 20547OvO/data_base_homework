@@ -18,7 +18,11 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       const data = await response.json();
       // 登录成功后保存 token 或用户信息
       localStorage.setItem("token", data.token);
-	  localStorage.setItem("user_id",data.userId)
+	  localStorage.setItem("user_id",data.userId);
+	  
+	  localStorage.setItem("user_name",username);
+	  console.log(username);
+	  
       alert("登录成功！");
 	     // 根据角色跳转到不同页面
 	     if (data.role == "customer") {
@@ -30,6 +34,9 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 	     else if (data.role == "admin") {
 	         window.location.href = "admin_home.html"; // 管理员主页
 	     }
+		 else if (data.role == "owner") {
+		     window.location.href = "../owner_home/owner_home.html"; // 管理员主页
+		 }
 	     else {
 	         console.warn("未知或未设置的用户角色:", data.role);
 	                        // 不跳转，显示错误信息

@@ -48,34 +48,54 @@ async function initPage() {
 async function loadOrders() {
     try {
         const riderId = localStorage.getItem('user_id');
-        const token = localStorage.getItem('token');
+		console.log("骑手订单为"+riderId);
+        // const token = localStorage.getItem('token');
         
         // 加载可接订单 (状态为created的订单)
-        const availableResponse = await fetch(`http://localhost:8080/api/orders?status=created`, {
+        const availableResponse = await fetch(`http://localhost:8080/api/orders/status/CREATED`, {
             headers: {
-                'Authorization': `Bearer ${token}`
+                // 'Authorization': `Bearer ${token}`
             }
         });
+		//json循环嵌套问题，需要转换为dto
+		let responseText = await availableResponse.text();
+		console.log("不是哥们"+responseText)
+		   if (availableResponse.ok) {
+		        try {
+		            const result = JSON.parse(responseText);
+					console.log(result.data);
+		            availableOrders = result.data || [];
+		        } catch (e) {
+		            console.error("解析响应失败:", e, "响应文本:", responseText);
+		            availableOrders = [];
+		        }
+		   } else {
+		        console.error("请求失败，状态码:", availableResponse.status, "响应文本:", responseText);
+		        // 可以根据需要处理错误，比如抛出异常或设置默认值
+		   }
         
-        if (availableResponse.ok) {
-            const result = await availableResponse.json();
-            availableOrders = result.data || [];
-        } else {
-            console.error('获取可接订单失败:', availableResponse.status);
-            availableOrders = [];
-        }
+   //      if (availableResponse.ok) {
+			
+			
+   //          const result = await availableResponse.json();
+   //          availableOrders = result.data || [];
+   //      } else {
+   //          console.error('获取可接订单失败:', availableResponse.status);
+   //          availableOrders = [];
+   //      }
         
         // 加载骑手已接订单 (骑手ID匹配且状态为accepted或delivering)
+		console.log("执行到这了");
         const myTasksResponse = await fetch(`http://localhost:8080/api/orders/rider/${riderId}`, {
             headers: {
-                'Authorization': `Bearer ${token}`
+                // 'Authorization': `Bearer ${token}`
             }
         });
         
         if (myTasksResponse.ok) {
             const result = await myTasksResponse.json();
             myTasks = (result.data || []).filter(order => 
-                order.status === 'accepted' || order.status === 'delivering'
+                order.status === 'ACCEPTED' || order.status === 'DELIVERING'
             );
         } else {
             console.error('获取骑手任务失败:', myTasksResponse.status);
@@ -145,15 +165,16 @@ function renderMyTasks() {
     
     myTasksList.innerHTML = myTasks.map(task => {
         let statusText, statusClass, actionButton;
+		
         
-        if(task.status === 'accepted') {
+        if(task.status === 'ACCEPTED') {
             statusText = '已接单';
             statusClass = 'status-accepted';
-            actionButton = `<button class="btn btn-pickup" onclick="updateOrderStatus(${task.orderId}, 'delivering')">取餐</button>`;
-        } else if(task.status === 'delivering') {
+            actionButton = `<button class="btn btn-pickup" onclick="updateOrderStatus(${task.orderId}, 'DELIVERING')">取餐</button>`;
+        } else if(task.status === 'DELIVERING') {
             statusText = '配送中';
             statusClass = 'status-delivering';
-            actionButton = `<button class="btn btn-complete" onclick="updateOrderStatus(${task.orderId}, 'completed')">完成订单</button>`;
+            actionButton = `<button class="btn btn-complete" onclick="updateOrderStatus(${task.orderId}, 'COMPLETED')">完成订单</button>`;
         } else {
             statusText = '已完成';
             statusClass = 'status-completed';
@@ -188,7 +209,7 @@ async function acceptOrder(orderId) {
         const token = localStorage.getItem('token');
         
         // 调用API接单
-        const response = await fetch(`http://localhost:8080/api/orders/${orderId}/status?status=accepted&riderId=${riderId}`, {
+        const response = await fetch(`http://localhost:8080/api/orders/${orderId}/status?status=ACCEPTED&riderId=${riderId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -201,7 +222,7 @@ async function acceptOrder(orderId) {
             const orderIndex = availableOrders.findIndex(order => order.orderId === orderId);
             if (orderIndex !== -1) {
                 const acceptedOrder = availableOrders[orderIndex];
-                acceptedOrder.status = 'accepted';
+                acceptedOrder.status = 'ACCEPTED';
                 // 添加到我的任务
                 myTasks.push(acceptedOrder);
                 availableOrders.splice(orderIndex, 1);
@@ -224,16 +245,17 @@ async function acceptOrder(orderId) {
 
 // 更新订单状态
 async function updateOrderStatus(orderId, newStatus) {
+	console.log("开始改变订单状态"+orderId+newStatus);
     try {
-        const token = localStorage.getItem('token');
+        // const token = localStorage.getItem('token');
         
         // 调用API更新状态
         const response = await fetch(`http://localhost:8080/api/orders/${orderId}/status?status=${newStatus}`, {
             method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            // headers: {
+            //     'Authorization': `Bearer ${token}`,
+            //     'Content-Type': 'application/json'
+            // }
         });
         
         if (response.ok) {
@@ -368,11 +390,16 @@ function getOrderItemsText(items) {
 // 辅助函数 - 获取订单状态文本
 function getStatusText(status) {
     const statusMap = {
-        'created': '待接单',
-        'accepted': '已接单',
-        'delivering': '配送中',
-        'completed': '已完成',
-        'cancelled': '已取消'
+        'CREATED': '待接单',
+        'ACCEPTED': '已接单',
+        'DELIVERING': '配送中',
+        'COMPLETED': '已完成',
+        'CANCELLED': '已取消'
+		// 'created': '待接单',
+		// 'accepted': '已接单',
+		// 'delivering': '配送中',
+		// 'completed': '已完成',
+		// 'cancelled': '已取消'
     };
     
     return statusMap[status] || status;
