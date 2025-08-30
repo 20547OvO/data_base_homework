@@ -1,6 +1,7 @@
 package org.example.deliver_dish_backend.controller;
 
 import org.example.deliver_dish_backend.model.dto.ApiResponse;
+import org.example.deliver_dish_backend.model.dto.DishDTO;
 import org.example.deliver_dish_backend.model.entity.Dish;
 import org.example.deliver_dish_backend.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class DishController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createDish(@RequestBody Dish dish) {
+    public ResponseEntity<?> createDish(@RequestBody DishDTO dish) {
         Dish newDish = dishService.createDish(dish);
         return ResponseEntity.ok(ApiResponse.success("菜品创建成功", newDish));
     }

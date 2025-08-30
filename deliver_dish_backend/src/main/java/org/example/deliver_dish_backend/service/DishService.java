@@ -1,7 +1,10 @@
 package org.example.deliver_dish_backend.service;
 
+import org.example.deliver_dish_backend.model.dto.DishDTO;
 import org.example.deliver_dish_backend.model.entity.Dish;
+import org.example.deliver_dish_backend.model.entity.Restaurant;
 import org.example.deliver_dish_backend.repository.DishRepository;
+import org.example.deliver_dish_backend.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,8 @@ import java.util.Optional;
 public class DishService {
     @Autowired
     private DishRepository dishRepository;
+    @Autowired
+    private RestaurantRepository restaurantRepository;
 
     public List<Dish> getAllDishes() {
         return dishRepository.findAll();
@@ -25,8 +30,20 @@ public class DishService {
         return dishRepository.findByRestaurantRestaurantId(restaurantId);
     }
 
-    public Dish createDish(Dish dish) {
-        return dishRepository.save(dish);
+    public Dish createDish(DishDTO dish) {
+        Optional<Restaurant> restaurantOptional = restaurantRepository.findById(dish.getRestaurantId());
+
+        if (restaurantOptional.isEmpty()) {
+            throw new RuntimeException("餐厅不存在，ID: " + dish.getRestaurantId());
+        }
+
+        Restaurant restaurant = restaurantOptional.get();
+        Dish dish1=new Dish();
+        dish1.setName(dish.getName());
+        dish1.setPrice(dish.getPrice());
+        dish1.setRestaurant(restaurant);
+        dish1.setStock(dish.getStock());
+        return dishRepository.save(dish1);
     }
 
     public Dish updateDish(Long id, Dish dishDetails) {

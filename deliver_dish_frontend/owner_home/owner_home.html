@@ -10,6 +10,7 @@
 			<h1>餐馆管理系统</h1>
 			<div>
 				<button class="btn btn-secondary" id="refreshAllBtn">刷新数据</button>
+				<button class="btn btn-primary" id="logoutBtn">退出登录</button>
 			</div>
 		</header>
 		
@@ -54,11 +55,11 @@
 				<div id="ordersFilter">
 					<select id="orderStatusFilter">
 						<option value="all">所有状态</option>
-						<option value="created">已创建</option>
-						<option value="accepted">已接受</option>
-						<option value="delivering">配送中</option>
-						<option value="completed">已完成</option>
-						<option value="cancelled">已取消</option>
+						<option value="CREATED">已创建</option>
+						<option value="ACCEPTED">已接受</option>
+						<option value="DELIVERING">配送中</option>
+						<option value="COMPLETED">已完成</option>
+						<option value="CANCELLED">已取消</option>
 					</select>
 				</div>
 				<div id="ordersList">

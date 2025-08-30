@@ -124,8 +124,34 @@ public class OrderService {
 //        return orderRepository.findByStatus(status);
     }
 
-    public List<Order> getOrdersByRestaurantId(Long restaurantId) {
-        return orderRepository.findByRestaurant_RestaurantId(restaurantId);
+    public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId) {
+        System.out.println("这次寻找的餐馆id为"+restaurantId);
+        List<Order> orders=orderRepository.findByRestaurant_RestaurantId(restaurantId);
+        return orders.stream().map(order -> {
+            OrderDTO dto = new OrderDTO();
+            dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setOrderId(order.getOrderId());
+            System.out.println("aaaacusid"+order.getCustomer().getUserId());
+            dto.setStatus(order.getStatus().name());
+            System.out.println("这次的订单转台为"+order.getStatus().name());
+            dto.setOrderId(order.getOrderId());
+            dto.setStatus(order.getStatus().name());
+            dto.setRestaurantName(order.getRestaurant().getName());
+            dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setTotalPrice(order.getTotalPrice());
+            // ✅ 转换 OrderItem -> OrderItemDTO
+            List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setItemId(item.getItemId());
+                itemDTO.setDishName(item.getDish().getName());
+                itemDTO.setQuantity(item.getQuantity());
+                itemDTO.setPrice(item.getPrice());
+                return itemDTO;
+            }).collect(Collectors.toList());
+
+            dto.setItems(itemDTOs);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public List<OrderDTO> getOrdersByRiderId(Long riderId) {

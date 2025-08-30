@@ -89,7 +89,8 @@ public class OrderController {
 
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<?> getOrdersByRestaurantId(@PathVariable Long restaurantId) {
-        List<Order> orders = orderService.getOrdersByRestaurantId(restaurantId);
+        List<OrderDTO> orders = orderService.getOrdersByRestaurantId(restaurantId);
+        System.out.println("thisorders"+orders);
         return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
     }
 

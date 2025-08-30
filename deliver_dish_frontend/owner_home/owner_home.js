@@ -26,7 +26,7 @@ const dishForm = document.getElementById('dishForm');
 const closeButtons = document.querySelectorAll('.close');
 const cancelRestaurantBtn = document.getElementById('cancelRestaurantBtn');
 const cancelDishBtn = document.getElementById('cancelDishBtn');
-
+const logoutBtn = document.getElementById('logoutBtn');
 // 初始化页面
 document.addEventListener('DOMContentLoaded', () => {
 	loadRestaurants();
@@ -48,6 +48,7 @@ function setupEventListeners() {
 			loadOrders(selectedRestaurantId);
 		}
 	});
+	logoutBtn.addEventListener('click', handleLogout);
 	
 	refreshAllBtn.addEventListener('click', () => {
 		loadRestaurants();
@@ -128,6 +129,7 @@ async function loadRestaurants() {
 		restaurantsList.classList.add('loading');
 		// const data = await apiRequest('/restaurants');
 		const data = await apiRequest(`/restaurants/owner/${ownerId}`);
+		console.log("resturant"+JSON.stringify(data.data));
 		restaurants = data.data || [];
 		renderRestaurants();
 	} catch (error) {
@@ -160,7 +162,9 @@ async function loadDishes(restaurantId) {
 	try {
 		dishesList.classList.add('loading');
 		const data = await apiRequest(`/dishes/restaurant/${restaurantId}`);
+		console.log("这次加载的餐馆为"+restaurantId);
 		dishes = data.data || [];
+		console.log(JSON.stringify(dishes));
 		renderDishes();
 	} catch (error) {
 		console.error('加载菜品失败，使用模拟数据', error);
@@ -202,7 +206,9 @@ async function loadOrders(restaurantId) {
 	try {
 		ordersList.classList.add('loading');
 		const data = await apiRequest(`/orders/restaurant/${restaurantId}`);
+	
 		orders = data.data || [];
+		console.log("这个餐馆为订单为"+JSON.stringify(orders));
 		renderOrders();
 	} catch (error) {
 		console.error('加载订单失败，使用模拟数据', error);
@@ -292,7 +298,7 @@ function renderRestaurants() {
 		<div class="card restaurant-card ${selectedRestaurantId === restaurant.restaurant_id ? 'selected' : ''}" data-id="${restaurant.restaurant_id}">
 			<div class="card-header">
 				<div class="card-title">${restaurant.name}</div>
-				<button class="btn-danger" onclick="deleteRestaurant(${restaurant.restaurant_id})">删除</button>
+				<button class="btn-danger" onclick="deleteRestaurant(${restaurant.restaurantId})">删除</button>
 			</div>
 			<div class="card-content">
 				<p>${restaurant.address}</p>
@@ -300,7 +306,7 @@ function renderRestaurants() {
 				<p>${restaurant.description || '暂无描述'}</p>
 			</div>
 			<div class="card-footer">
-				<button class="btn btn-primary" onclick="selectRestaurant(${restaurant.restaurant_id})">管理餐馆</button>
+				<button class="btn btn-primary" onclick="selectRestaurant(${restaurant.restaurantId})">管理餐馆</button>
 			</div>
 		</div>
 	`).join('');
@@ -318,8 +324,10 @@ function renderDishes() {
 		dishesCount.textContent = "0";
 		return;
 	}
+	console.log("目前选中的餐馆为"+selectedRestaurantId);
 	
-	const restaurantDishes = dishes.filter(dish => dish.restaurant_id === selectedRestaurantId);
+	
+	const restaurantDishes = dishes.filter(dish => dish.restaurant.restaurantId === selectedRestaurantId);
 	dishesCount.textContent = restaurantDishes.length;
 	
 	if (restaurantDishes.length === 0) {
@@ -336,7 +344,7 @@ function renderDishes() {
 		<div class="card">
 			<div class="card-header">
 				<div class="card-title">${dish.name}</div>
-				<button class="btn-danger" onclick="deleteDish(${dish.dish_id})">删除</button>
+				<button class="btn-danger" onclick="deleteDish(${dish.dishId})">删除</button>
 			</div>
 			<div class="card-content">
 				<p>价格: ¥${dish.price.toFixed(2)}</p>
@@ -344,7 +352,7 @@ function renderDishes() {
 				<p>${dish.description || '暂无描述'}</p>
 			</div>
 			<div class="card-footer">
-				<button class="btn btn-secondary" onclick="updateDishStock(${dish.dish_id}, ${dish.stock})">更新库存</button>
+				<button class="btn btn-secondary" onclick="updateDishStock(${dish.dishId}, ${dish.stock})">更新库存</button>
 			</div>
 		</div>
 	`).join('');
@@ -362,8 +370,11 @@ function renderOrders() {
 		ordersCount.textContent = "0";
 		return;
 	}
+	console.log("目前加载订单的餐馆id为"+selectedRestaurantId);
 	
 	const statusFilter = orderStatusFilter.value;
+	
+	console.log("这次加载的订单为"+JSON.stringify(orders))
 	let filteredOrders = orders;
 	
 	if (statusFilter !== 'all') {
@@ -385,19 +396,19 @@ function renderOrders() {
 	ordersList.innerHTML = filteredOrders.map(order => `
 		<div class="card">
 			<div class="card-header">
-				<div class="card-title">订单 #${order.order_id}</div>
+				<div class="card-title">订单 #${order.orderId}</div>
 				<span class="status-badge status-${order.status}">${getStatusText(order.status)}</span>
 			</div>
 			<div class="card-content">
-				<p>顾客: ${order.customer_name || `ID: ${order.customer_id}`}</p>
-				<p>总价: ¥${order.total_price.toFixed(2)}</p>
+				<p>顾客: ${order.customer_name || `ID: ${order.customerId}`}</p>
+				<p>总价: ¥${order.totalPrice.toFixed(2)}</p>
 				<p>下单时间: ${formatDateTime(order.create_time)}</p>
 				
 				<div class="order-items">
 					<strong>订单内容:</strong>
 					${order.items ? order.items.map(item => `
 						<div class="order-item">
-							<span>${item.name} × ${item.quantity}</span>
+							<span>${item.dishName} × ${item.quantity}</span>
 							<span>¥${(item.price * item.quantity).toFixed(2)}</span>
 						</div>
 					`).join('') : '无订单详情'}
@@ -435,11 +446,11 @@ function getOrderActions(order) {
 // 获取状态文本
 function getStatusText(status) {
 	const statusMap = {
-		'created': '已创建',
-		'accepted': '已接受',
-		'delivering': '配送中',
-		'completed': '已完成',
-		'cancelled': '已取消'
+		'CREATED': '已创建',
+		'ACCEPTED': '已接受',
+		'DELIVERING': '配送中',
+		'COMPLETED': '已完成',
+		'CANCELLED': '已取消'
 	};
 	return statusMap[status] || status;
 }
@@ -516,11 +527,12 @@ async function handleAddDish(e) {
 	const stock = parseInt(document.getElementById('dishStock').value);
 	const description = document.getElementById('dishDescription').value;
 	
+	
 	try {
 		const data = await apiRequest('/dishes', {
 			method: 'POST',
 			body: JSON.stringify({ 
-				restaurant_id: selectedRestaurantId, 
+				restaurantId: selectedRestaurantId, 
 				name, 
 				price, 
 				stock, 
@@ -546,6 +558,7 @@ async function handleAddDish(e) {
 async function deleteRestaurant(id) {
 	if (confirm('确定要删除这个餐馆吗？同时也会删除该餐馆的所有菜品和订单！')) {
 		try {
+			console.log("这个餐馆的id为"+id);
 			const data = await apiRequest(`/restaurants/${id}`, {
 				method: 'DELETE'
 			});
@@ -618,6 +631,14 @@ async function updateDishStock(id, currentStock) {
 		console.error('更新库存失败', error);
 		alert('更新库存失败，请重试');
 	}
+}
+// 处理退出登录
+function handleLogout() {
+    if(confirm('确定要退出登录吗？')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_id');
+        window.location.href = '../login/login.html';
+    }
 }
 
 // 全局函数声明
