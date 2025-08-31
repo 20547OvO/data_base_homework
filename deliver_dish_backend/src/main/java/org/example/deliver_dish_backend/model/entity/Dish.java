@@ -22,14 +22,27 @@ public class Dish {
 
     private Integer stock = 100;
 
+    private String src;
+
+
+
     // 构造方法
     public Dish() {}
 
-    public Dish(Restaurant restaurant, String name, BigDecimal price, Integer stock) {
+    public Dish(Restaurant restaurant, String name, BigDecimal price, Integer stock,String src) {
         this.restaurant = restaurant;
         this.name = name;
         this.price = price;
         this.stock = stock;
+        this.src = src;
+    }
+
+    public String getSrc() {
+        return src;
+    }
+
+    public void setSrc(String src) {
+        this.src = src;
     }
 
     // Getter和Setter方法

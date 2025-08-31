@@ -7,9 +7,20 @@ public class RestaurantDTO {
     private String phone;
     private Double rating;
     private Integer minOrderPrice;
+    private String src;
+
+
 
     // 构造方法
     public RestaurantDTO() {}
+
+    public String getSrc() {
+        return src;
+    }
+
+    public void setSrc(String src) {
+        this.src = src;
+    }
 
     // Getter和Setter方法
     public Long getRestaurantId() { return restaurantId; }

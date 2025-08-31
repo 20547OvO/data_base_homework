@@ -78,7 +78,7 @@
 				<div class="modal-header">
 					<h2>添加新餐馆</h2>
 				</div>
-				<form id="restaurantForm">
+				<form id="restaurantForm" enctype="multipart/form-data">
 					<div class="form-group">
 						<label for="restaurantName">餐馆名称</label>
 						<input type="text" id="restaurantName" required placeholder="请输入餐馆名称">
@@ -95,6 +95,13 @@
 						<label for="restaurantDescription">餐馆描述</label>
 						<textarea id="restaurantDescription" rows="3" placeholder="请输入餐馆描述"></textarea>
 					</div>
+					<div class="form-group">
+						<label for="restaurantImage">餐馆图片</label>
+						<input type="file" id="restaurantImage" accept="image/*">
+						<div id="imagePreview" class="image-preview" style="display: none;">
+							<img id="previewImg" src="" alt="图片预览">
+						</div>
+					</div>
 					<div class="form-actions">
 						<button type="button" class="btn" id="cancelRestaurantBtn">取消</button>
 						<button type="submit" class="btn btn-primary">保存</button>
@@ -104,32 +111,88 @@
 		</div>
 		
 		<!-- 添加菜品模态框 -->
+		<!-- 修改添加菜品模态框 -->
 		<div id="dishModal" class="modal">
+		    <div class="modal-content">
+		        <span class="close">&times;</span>
+		        <div class="modal-header">
+		            <h2>添加新菜品</h2>
+		        </div>
+		        <form id="dishForm" enctype="multipart/form-data">
+		            <div class="form-group">
+		                <label for="dishName">菜品名称</label>
+		                <input type="text" id="dishName" required placeholder="请输入菜品名称">
+		            </div>
+		            <div class="form-group">
+		                <label for="dishPrice">价格 (¥)</label>
+		                <input type="number" id="dishPrice" min="0" step="0.01" required placeholder="请输入价格">
+		            </div>
+		            <div class="form-group">
+		                <label for="dishStock">库存</label>
+		                <input type="number" id="dishStock" min="0" value="100" required placeholder="请输入库存数量">
+		            </div>
+		            <div class="form-group">
+		                <label for="dishDescription">菜品描述</label>
+		                <textarea id="dishDescription" rows="3" placeholder="请输入菜品描述"></textarea>
+		            </div>
+		            <div class="form-group">
+		                <label for="dishImage">菜品图片</label>
+		                <input type="file" id="dishImage" accept="image/*">
+		                <div id="dishImagePreview" class="image-preview" style="display: none;">
+		                    <img id="dishPreviewImg" src="" alt="菜品图片预览">
+		                </div>
+		            </div>
+		            <div class="form-actions">
+		                <button type="button" class="btn" id="cancelDishBtn">取消</button>
+		                <button type="submit" class="btn btn-primary">保存</button>
+		            </div>
+		        </form>
+		    </div>
+		</div>
+		
+		<!-- 添加更新菜品图片模态框 -->
+		<div id="updateDishImageModal" class="modal">
+		    <div class="modal-content">
+		        <span class="close">&times;</span>
+		        <div class="modal-header">
+		            <h2>更新菜品图片</h2>
+		        </div>
+		        <form id="updateDishImageForm" enctype="multipart/form-data">
+		            <input type="hidden" id="updateDishId">
+		            <div class="form-group">
+		                <label for="updateDishImage">选择新图片</label>
+		                <input type="file" id="updateDishImage" accept="image/*">
+		                <div id="updateDishImagePreview" class="image-preview" style="display: none;">
+		                    <img id="updateDishPreviewImg" src="" alt="菜品图片预览">
+		                </div>
+		            </div>
+		            <div class="form-actions">
+		                <button type="button" class="btn" id="cancelUpdateDishImageBtn">取消</button>
+		                 <button type="button" class="btn btn-primary" id="confirmUpdateDishImageBtn">更新图片</button>
+		            </div>
+		        </form>
+		    </div>
+		</div>
+
+		<!-- 更新餐馆图片模态框 -->
+		<div id="updateImageModal" class="modal">
 			<div class="modal-content">
 				<span class="close">&times;</span>
 				<div class="modal-header">
-					<h2>添加新菜品</h2>
+					<h2>更新餐馆图片</h2>
 				</div>
-				<form id="dishForm">
+				<form id="updateImageForm" enctype="multipart/form-data">
+					<input type="hidden" id="updateRestaurantId">
 					<div class="form-group">
-						<label for="dishName">菜品名称</label>
-						<input type="text" id="dishName" required placeholder="请输入菜品名称">
-					</div>
-					<div class="form-group">
-						<label for="dishPrice">价格 (¥)</label>
-						<input type="number" id="dishPrice" min="0" step="0.01" required placeholder="请输入价格">
-					</div>
-					<div class="form-group">
-						<label for="dishStock">库存</label>
-						<input type="number" id="dishStock" min="0" value="100" required placeholder="请输入库存数量">
-					</div>
-					<div class="form-group">
-						<label for="dishDescription">菜品描述</label>
-						<textarea id="dishDescription" rows="3" placeholder="请输入菜品描述"></textarea>
+						<label for="updateRestaurantImage">选择新图片</label>
+						<input type="file" id="updateRestaurantImage" accept="image/*">
+						<div id="updateImagePreview" class="image-preview" style="display: none;">
+							<img id="updatePreviewImg" src="" alt="图片预览">
+						</div>
 					</div>
 					<div class="form-actions">
-						<button type="button" class="btn" id="cancelDishBtn">取消</button>
-						<button type="submit" class="btn btn-primary">保存</button>
+						<button type="button" class="btn" id="cancelUpdateImageBtn">取消</button>
+						<button type="submit" class="btn btn-primary">更新图片</button>
 					</div>
 				</form>
 			</div>

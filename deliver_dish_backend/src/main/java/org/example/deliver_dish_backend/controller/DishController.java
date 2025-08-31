@@ -7,7 +7,9 @@ import org.example.deliver_dish_backend.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,15 +43,42 @@ public class DishController {
         return ResponseEntity.ok(ApiResponse.success("获取成功", dishes));
     }
 
-    @PostMapping
-    public ResponseEntity<?> createDish(@RequestBody DishDTO dish) {
-        Dish newDish = dishService.createDish(dish);
-        return ResponseEntity.ok(ApiResponse.success("菜品创建成功", newDish));
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createDish(
+            @RequestPart DishDTO dish,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        try {
+            Dish newDish = dishService.createDish(dish, imageFile);
+            return ResponseEntity.ok(ApiResponse.success("菜品创建成功", newDish));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("图片上传失败: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("菜品创建失败: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<?> uploadDishImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile imageFile) {
+        try {
+            Dish updatedDish = dishService.updateDishImage(id, imageFile);
+            return ResponseEntity.ok(ApiResponse.success("菜品图片上传成功", updatedDish));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("图片上传失败: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("更新失败: " + e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDish(@PathVariable Long id, @RequestBody Dish dish) {
-        Dish updatedDish = dishService.updateDish(id, dish);
+    public ResponseEntity<?> updateDish(@PathVariable Long id, @RequestBody Dish dish, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        Dish updatedDish = null;
+        try {
+            updatedDish = dishService.updateDish(id, dish,imageFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         if (updatedDish != null) {
             return ResponseEntity.ok(ApiResponse.success("菜品更新成功", updatedDish));
         } else {

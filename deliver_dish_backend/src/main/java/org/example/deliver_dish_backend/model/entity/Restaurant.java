@@ -21,9 +21,13 @@ public class Restaurant {
 
     private String phone;
 
+    private String src;
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
+
+
 
     @Column(updatable = false)
     private LocalDateTime createTime;
@@ -31,11 +35,12 @@ public class Restaurant {
     // 构造方法
     public Restaurant() {}
 
-    public Restaurant(String name, String address, String phone, User owner) {
+    public Restaurant(String name, String address, String phone, User owner,String src) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.owner = owner;
+        this.src = src;
     }
 
     @PrePersist
@@ -61,4 +66,11 @@ public class Restaurant {
 
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
+    public String getSrc() {
+        return src;
+    }
+
+    public void setSrc(String src) {
+        this.src = src;
+    }
 }

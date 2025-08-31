@@ -298,4 +298,38 @@ select, input {
     flex-direction: column;
     gap: 10px;
   }
+  /* 餐馆图片样式 */
+  .restaurant-image {
+    height: 160px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #e8f5e9;
+  }
+  
+  .restaurant-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 保持图片比例，裁剪多余部分 */
+    transition: transform 0.3s ease;
+  }
+  
+  .restaurant-card:hover .restaurant-image img {
+    transform: scale(1.05); /* 鼠标悬停时轻微放大 */
+  }
+  
+  .restaurant-image .fa-utensils {
+    color: #42b983;
+    font-size: 3rem;
+  }
+  /* 无图片时的占位符样式 */
+  .restaurant-image.placeholder {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    color: #42b983;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

@@ -6,8 +6,10 @@ import org.example.deliver_dish_backend.model.dto.RestaurantRequest;
 import org.example.deliver_dish_backend.model.entity.Restaurant;
 import org.example.deliver_dish_backend.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +27,18 @@ public class RestaurantController {
         List<Restaurant> restaurants = restaurantService.getAllRestaurants();
         System.out.println("aaaastartforresturant");
         return ResponseEntity.ok(ApiResponse.success("获取成功", restaurants));
+    }
+
+    // 添加文件上传接口
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<?> uploadRestaurantImage(@PathVariable Long id,
+                                                   @RequestParam("image") MultipartFile imageFile) {
+        try {
+            Restaurant updatedRestaurant = restaurantService.updateRestaurantImage(id, imageFile);
+            return ResponseEntity.ok(ApiResponse.success("图片上传成功", updatedRestaurant));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("图片上传失败: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
@@ -56,8 +70,10 @@ public class RestaurantController {
         return ResponseEntity.ok(ApiResponse.success("搜索成功", restaurants));
     }
 
-    @PostMapping
-    public ResponseEntity<?> createRestaurant(@RequestBody RestaurantRequest request) {
+    // 修改创建餐厅接口以支持图片上传
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createRestaurant(@RequestPart RestaurantRequest request,
+                                              @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         try {
             System.out.println("aaaacreaterestaurant"+ request);
             System.out.println("aaaacreaterestaurant - name: " + request.getName());
@@ -65,7 +81,8 @@ public class RestaurantController {
             System.out.println("aaaacreaterestaurant - phone: " + request.getPhone());
             System.out.println("aaaacreaterestaurant - description: " + request.getDescription());
             System.out.println("aaaacreaterestaurant - ownerId: " + request.getOwnerId());
-            Restaurant newRestaurant = restaurantService.createRestaurant(request);
+
+            Restaurant newRestaurant = restaurantService.createRestaurant(request, imageFile);
             System.out.println("aaaacreaterestaurantsuccess");
             return ResponseEntity.ok(ApiResponse.success("创建成功", newRestaurant));
         } catch (Exception e) {

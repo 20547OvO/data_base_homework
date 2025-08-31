@@ -1,3 +1,4 @@
+const IMAGE_BASE_URL = 'http://localhost:8080';
 // 从URL获取餐馆ID
 const urlParams = new URLSearchParams(window.location.search);
 const restaurantId = urlParams.get('id');
@@ -99,8 +100,20 @@ function renderDishes() {
 
         const dishImage = document.createElement('div');
         dishImage.className = 'dish-image';
-        dishImage.innerHTML = '<i class="fas fa-utensils"></i>';
-
+        
+        if (dish.src) {
+            const img = document.createElement('img');
+            img.src = IMAGE_BASE_URL+dish.src;
+            img.alt = dish.name;
+            img.onerror = function() {
+                // 如果图片加载失败，显示默认图标
+                this.style.display = 'none';
+                dishImage.innerHTML = '<i class="fas fa-utensils"></i>';
+            };
+            dishImage.appendChild(img);
+        } else {
+            dishImage.innerHTML = '<i class="fas fa-utensils"></i>';
+        }
         const dishInfo = document.createElement('div');
         dishInfo.className = 'dish-info';
 

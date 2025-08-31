@@ -86,6 +86,7 @@ async function loadRestaurants() {
 }
 
 // 显示餐馆列表
+// 显示餐馆列表
 function displayRestaurants(restaurants) {
   const restaurantGrid = document.querySelector('.restaurant-grid');
   restaurantGrid.innerHTML = '';
@@ -93,24 +94,25 @@ function displayRestaurants(restaurants) {
   restaurants.forEach(restaurant => {
     const card = document.createElement('div');
     card.className = 'restaurant-card';
-	
+    
     card.onclick = () => viewRestaurant(restaurant.restaurantId);
-	
+    
+    // 构建图片HTML - 如果有图片就显示图片，没有就显示图标
+    const imageHtml = restaurant.src 
+      ? `<img src="http://localhost:8080${restaurant.src}" alt="${restaurant.name}" class="restaurant-image">`
+      : `<div class="restaurant-image"><i class="fas fa-utensils fa-3x"></i></div>`;
     
     card.innerHTML = `
-      <div class="restaurant-image">
-        <i class="fas fa-utensils fa-3x"></i>
-      </div>
+      ${imageHtml}
       <div class="restaurant-info">
         <div class="restaurant-name">${restaurant.name}</div>
         <div class="restaurant-meta">
-          <span class="rating">${getStarRating(restaurant.rating)}</span>
-          
+          <span class="rating">${getStarRating(restaurant.rating || 0)}</span>
+          <span>¥${restaurant.minOrderPrice || 0}起送</span>
         </div>
         <button class="btn btn-primary">进入点餐</button>
       </div>
     `;
-	// <span>¥${restaurant.minOrderPrice}起送</span>
     
     restaurantGrid.appendChild(card);
   });
@@ -290,11 +292,11 @@ function getStarRating(rating) {
 // 辅助函数 - 获取订单状态文本
 function getStatusText(status) {
   const statusMap = {
-    'created': '已创建',
-    'accepted': '餐厅已接单',
-    'delivering': '配送中',
-    'completed': '已完成',
-    'cancelled': '已取消'
+    'CREATED': '已创建',
+    'ACCEPTED': '骑手已接单',
+    'DELIVERING': '配送中',
+    'COMPLETED': '已完成',
+    'CANCELLED': '已取消'
   };
   
   return statusMap[status] || status;

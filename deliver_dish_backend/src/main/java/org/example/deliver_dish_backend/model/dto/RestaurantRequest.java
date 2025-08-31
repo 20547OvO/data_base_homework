@@ -6,16 +6,27 @@ public class RestaurantRequest {
     private String phone;
     private String description;
     private Long ownerId;
+    private String src;
+
+
 
     // 构造方法、Getter和Setter
     public RestaurantRequest() {}
 
-    public RestaurantRequest(String name, String address, String phone, String description, Long ownerId) {
+    public RestaurantRequest(String name, String address, String phone, String description, Long ownerId,String src) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.description = description;
         this.ownerId = ownerId;
+        this.src = src;
+    }
+    public String getSrc() {
+        return src;
+    }
+
+    public void setSrc(String src) {
+        this.src = src;
     }
 
     public String getName() { return name; }

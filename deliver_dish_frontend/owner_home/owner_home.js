@@ -1,6 +1,6 @@
 // API基础URL
 const API_BASE_URL = 'http://localhost:8080/api';
-
+const IMAGE_BASE_URL = 'http://localhost:8080';
 // 全局数据
 let restaurants = [];
 let dishes = [];
@@ -27,6 +27,10 @@ const closeButtons = document.querySelectorAll('.close');
 const cancelRestaurantBtn = document.getElementById('cancelRestaurantBtn');
 const cancelDishBtn = document.getElementById('cancelDishBtn');
 const logoutBtn = document.getElementById('logoutBtn');
+document.getElementById('confirmUpdateDishImageBtn').addEventListener('click', function() {
+    const dishId = document.getElementById('updateDishId').value;
+    updateDishImage(dishId);
+});
 // 初始化页面
 document.addEventListener('DOMContentLoaded', () => {
 	loadRestaurants();
@@ -82,8 +86,43 @@ function setupEventListeners() {
 	restaurantForm.addEventListener('submit', handleAddRestaurant);
 	dishForm.addEventListener('submit', handleAddDish);
 	
+	// 图片预览功能
+	document.getElementById('restaurantImage').addEventListener('change', function(e) {
+	    previewImage(e.target, 'previewImg', 'imagePreview');
+	});
+	    
+	document.getElementById('updateRestaurantImage').addEventListener('change', function(e) {
+	    previewImage(e.target, 'updatePreviewImg', 'updateImagePreview');
+	});
+	    
+	    // 更新图片模态框事件
+	document.getElementById('cancelUpdateImageBtn').addEventListener('click', function() {
+	    document.getElementById('updateImageModal').style.display = 'none';
+	});
+	    
+	document.getElementById('updateImageForm').addEventListener('submit', handleUpdateRestaurantImage);
+	// 图片预览功能
+	document.getElementById('dishImage').addEventListener('change', function(e) {
+	    previewImage(e.target, 'dishPreviewImg', 'dishImagePreview');
+	});
+	
+	document.getElementById('updateDishImage').addEventListener('change', function(e) {
+	    previewImage(e.target, 'updateDishPreviewImg', 'updateDishImagePreview');
+	});
+	
+	// 更新菜品图片模态框事件
+	document.getElementById('cancelUpdateDishImageBtn').addEventListener('click', function() {
+	    document.getElementById('updateDishImageModal').style.display = 'none';
+	});
+	
 	// 点击模态框外部关闭
 	window.addEventListener('click', (e) => {
+		  if (e.target === document.getElementById('updateDishImageModal')) {
+		        document.getElementById('updateDishImageModal').style.display = 'none';
+		    }
+		if (e.target === document.getElementById('updateImageModal')) {
+		            document.getElementById('updateImageModal').style.display = 'none';
+		        }
 		if (e.target === restaurantModal) {
 			restaurantModal.style.display = 'none';
 		}
@@ -129,6 +168,7 @@ async function loadRestaurants() {
 		restaurantsList.classList.add('loading');
 		// const data = await apiRequest('/restaurants');
 		const data = await apiRequest(`/restaurants/owner/${ownerId}`);
+		
 		console.log("resturant"+JSON.stringify(data.data));
 		restaurants = data.data || [];
 		renderRestaurants();
@@ -281,81 +321,102 @@ async function updateOrderStatus(orderId, status) {
 }
 
 // 渲染餐馆列表
+// 修改渲染餐馆列表函数以显示图片
 function renderRestaurants() {
-	restaurantsCount.textContent = restaurants.length;
-	
-	if (restaurants.length === 0) {
-		restaurantsList.innerHTML = `
-			<div class="empty-state">
-				<i>🏪</i>
-				<p>暂无餐馆，请添加您的第一家餐馆</p>
-			</div>
-		`;
-		return;
-	}
-	
-	restaurantsList.innerHTML = restaurants.map(restaurant => `
-		<div class="card restaurant-card ${selectedRestaurantId === restaurant.restaurant_id ? 'selected' : ''}" data-id="${restaurant.restaurant_id}">
-			<div class="card-header">
-				<div class="card-title">${restaurant.name}</div>
-				<button class="btn-danger" onclick="deleteRestaurant(${restaurant.restaurantId})">删除</button>
-			</div>
-			<div class="card-content">
-				<p>${restaurant.address}</p>
-				<p>${restaurant.phone}</p>
-				<p>${restaurant.description || '暂无描述'}</p>
-			</div>
-			<div class="card-footer">
-				<button class="btn btn-primary" onclick="selectRestaurant(${restaurant.restaurantId})">管理餐馆</button>
-			</div>
-		</div>
-	`).join('');
+    restaurantsCount.textContent = restaurants.length;
+    
+    if (restaurants.length === 0) {
+        restaurantsList.innerHTML = `
+            <div class="empty-state">
+                <i>🏪</i>
+                <p>暂无餐馆，请添加您的第一家餐馆</p>
+            </div>
+        `;
+        return;
+    }
+    
+    restaurantsList.innerHTML = restaurants.map(restaurant => `
+        <div class="card restaurant-card ${selectedRestaurantId === restaurant.restaurantId ? 'selected' : ''}" data-id="${restaurant.restaurantId}">
+            <div class="card-header">
+                <div class="card-title">${restaurant.name}</div>
+                <div>
+                    <button class="btn-image" onclick="openUpdateImageModal(${restaurant.restaurantId})">更换图片</button>
+                    <button class="btn-danger" onclick="deleteRestaurant(${restaurant.restaurantId})">删除</button>
+                </div>
+            </div>
+            <div class="card-content">
+               ${restaurant.src ? 
+                                   `<img src="${IMAGE_BASE_URL}${restaurant.src}" class="restaurant-image" alt="${restaurant.name}">` : 
+                                   `<div class="restaurant-image-placeholder">🏪</div>`
+                               }
+                <p>${restaurant.address}</p>
+                <p>${restaurant.phone}</p>
+                <p>${restaurant.description || '暂无描述'}</p>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary" onclick="selectRestaurant(${restaurant.restaurantId})">管理餐馆</button>
+            </div>
+        </div>
+    `).join('');
 }
 
+
 // 渲染菜品列表
+// 修改renderDishes函数以显示菜品图片
 function renderDishes() {
-	if (!selectedRestaurantId) {
-		dishesList.innerHTML = `
-			<div class="empty-state">
-				<i>🍲</i>
-				<p>请先选择餐馆，然后添加菜品</p>
-			</div>
-		`;
-		dishesCount.textContent = "0";
-		return;
-	}
-	console.log("目前选中的餐馆为"+selectedRestaurantId);
-	
-	
-	const restaurantDishes = dishes.filter(dish => dish.restaurant.restaurantId === selectedRestaurantId);
-	dishesCount.textContent = restaurantDishes.length;
-	
-	if (restaurantDishes.length === 0) {
-		dishesList.innerHTML = `
-			<div class="empty-state">
-				<i>🍲</i>
-				<p>该餐馆暂无菜品，请添加菜品</p>
-			</div>
-		`;
-		return;
-	}
-	
-	dishesList.innerHTML = restaurantDishes.map(dish => `
-		<div class="card">
-			<div class="card-header">
-				<div class="card-title">${dish.name}</div>
-				<button class="btn-danger" onclick="deleteDish(${dish.dishId})">删除</button>
-			</div>
-			<div class="card-content">
-				<p>价格: ¥${dish.price.toFixed(2)}</p>
-				<p>库存: ${dish.stock}</p>
-				<p>${dish.description || '暂无描述'}</p>
-			</div>
-			<div class="card-footer">
-				<button class="btn btn-secondary" onclick="updateDishStock(${dish.dishId}, ${dish.stock})">更新库存</button>
-			</div>
-		</div>
-	`).join('');
+    if (!selectedRestaurantId) {
+        dishesList.innerHTML = `
+            <div class="empty-state">
+                <i>🍲</i>
+                <p>请先选择餐馆，然后添加菜品</p>
+            </div>
+        `;
+        dishesCount.textContent = "0";
+        return;
+    }
+    
+    const restaurantDishes = dishes.filter(dish => dish.restaurant.restaurantId === selectedRestaurantId);
+    dishesCount.textContent = restaurantDishes.length;
+    
+    if (restaurantDishes.length === 0) {
+        dishesList.innerHTML = `
+            <div class="empty-state">
+                <i>🍲</i>
+                <p>该餐馆暂无菜品，请添加菜品</p>
+            </div>
+        `;
+        return;
+    }
+    
+    dishesList.innerHTML = restaurantDishes.map(dish => `
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">${dish.name}</div>
+                <div>
+                    <button class="btn-image" onclick="openUpdateDishImageModal(${dish.dishId})">更换图片</button>
+                    <button class="btn-danger" onclick="deleteDish(${dish.dishId})">删除</button>
+                </div>
+            </div>
+            <div class="card-content">
+                ${dish.src ? 
+                    `<img src="${IMAGE_BASE_URL}${dish.src}" class="restaurant-image" alt="${dish.name}">` : 
+                    `<div class="dish-image-placeholder">🍲</div>`
+                }
+                <p>价格: ¥${dish.price.toFixed(2)}</p>
+                <p>库存: ${dish.stock}</p>
+                <p>${dish.description || '暂无描述'}</p>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-secondary" onclick="updateDishStock(${dish.dishId}, ${dish.stock})">更新库存</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 添加打开更新菜品图片模态框的函数
+function openUpdateDishImageModal(dishId) {
+    document.getElementById('updateDishId').value = dishId;
+    document.getElementById('updateDishImageModal').style.display = 'block';
 }
 
 // 渲染订单列表
@@ -477,81 +538,160 @@ function updateAddDishButton() {
 }
 
 // 处理添加餐馆
+// 修改处理添加餐馆函数以支持图片上传
 async function handleAddRestaurant(e) {
-	e.preventDefault();
-	const ownerId = localStorage.getItem('user_id');
-	if (!ownerId) {
-	        showError('用户未登录，请先登录');
-	        window.location.href = '../login/login.html';
-	        return;
-	    };
-				 
-	
-	const name = document.getElementById('restaurantName').value;
-	const address = document.getElementById('restaurantAddress').value;
-	const phone = document.getElementById('restaurantPhone').value;
-	const description = document.getElementById('restaurantDescription').value;
-	
-	try {
-		console.log("开始传送数据")
-		const data = await apiRequest('/restaurants', {
-			method: 'POST',
-			body: JSON.stringify({ name, address, phone, description,ownerId: parseInt(ownerId) })
-		});
-		
-		if (data.success) {
-			// 重新加载餐馆列表
-			loadRestaurants();
-			restaurantModal.style.display = 'none';
-			restaurantForm.reset();
-		} else {
-			alert('添加餐馆失败: ' + data.message);
-		}
-	} catch (error) {
-		console.error('添加餐馆失败', error);
-		alert('添加餐馆失败，请重试');
-	}
+    e.preventDefault();
+    const ownerId = localStorage.getItem('user_id');
+    if (!ownerId) {
+        showError('用户未登录，请先登录');
+        window.location.href = '../login/login.html';
+        return;
+    };
+    
+    const name = document.getElementById('restaurantName').value;
+    const address = document.getElementById('restaurantAddress').value;
+    const phone = document.getElementById('restaurantPhone').value;
+    const description = document.getElementById('restaurantDescription').value;
+    const imageFile = document.getElementById('restaurantImage').files[0];
+    
+    try {
+        // 创建餐厅请求对象
+        const restaurantRequest = {
+            name,
+            address,
+            phone,
+            description,
+            ownerId
+        };
+        
+        // 使用FormData处理文件上传
+        const formData = new FormData();
+        // 将请求对象转为JSON字符串并添加到FormData
+        formData.append('request', new Blob([JSON.stringify(restaurantRequest)], {
+            type: "application/json"
+        }));
+        
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/restaurants`, {
+            method: 'POST',
+            body: formData
+            // 注意：不要手动设置Content-Type，浏览器会自动设置正确的boundary
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // 重新加载餐馆列表
+            loadRestaurants();
+            restaurantModal.style.display = 'none';
+            restaurantForm.reset();
+            document.getElementById('imagePreview').style.display = 'none';
+        } else {
+            alert('添加餐馆失败: ' + data.message);
+        }
+    } catch (error) {
+        console.error('添加餐馆失败', error);
+        alert('添加餐馆失败，请重试');
+    }
 }
 
 // 处理添加菜品
+// 修改dishModal的HTML结构（在owner_home.html中）
+// 需要在dishModal中添加图片上传字段
+
+// 修改handleAddDish函数
 async function handleAddDish(e) {
-	e.preventDefault();
-	
-	if (!selectedRestaurantId) {
-		alert('请先选择餐馆');
-		return;
-	}
-	
-	const name = document.getElementById('dishName').value;
-	const price = parseFloat(document.getElementById('dishPrice').value);
-	const stock = parseInt(document.getElementById('dishStock').value);
-	const description = document.getElementById('dishDescription').value;
-	
-	
-	try {
-		const data = await apiRequest('/dishes', {
-			method: 'POST',
-			body: JSON.stringify({ 
-				restaurantId: selectedRestaurantId, 
-				name, 
-				price, 
-				stock, 
-				description 
-			})
-		});
-		
-		if (data.success) {
-			// 重新加载菜品列表
-			loadDishes(selectedRestaurantId);
-			dishModal.style.display = 'none';
-			dishForm.reset();
-		} else {
-			alert('添加菜品失败: ' + data.message);
-		}
-	} catch (error) {
-		console.error('添加菜品失败', error);
-		alert('添加菜品失败，请重试');
-	}
+    e.preventDefault();
+    
+    if (!selectedRestaurantId) {
+        alert('请先选择餐馆');
+        return;
+    }
+    
+    const name = document.getElementById('dishName').value;
+    const price = parseFloat(document.getElementById('dishPrice').value);
+    const stock = parseInt(document.getElementById('dishStock').value);
+    const description = document.getElementById('dishDescription').value;
+    const imageFile = document.getElementById('dishImage').files[0];
+    
+    try {
+        // 使用FormData处理文件上传
+        const formData = new FormData();
+        const dishRequest = {
+            restaurantId: selectedRestaurantId,
+            name,
+            price,
+            stock,
+            description
+        };
+        
+        formData.append('dish', new Blob([JSON.stringify(dishRequest)], {
+            type: "application/json"
+        }));
+        
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/dishes`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // 重新加载菜品列表
+            loadDishes(selectedRestaurantId);
+            dishModal.style.display = 'none';
+            dishForm.reset();
+            document.getElementById('dishImagePreview').style.display = 'none';
+        } else {
+            alert('添加菜品失败: ' + data.message);
+        }
+    } catch (error) {
+        console.error('添加菜品失败', error);
+        alert('添加菜品失败，请重试');
+    }
+}
+
+// 添加上传菜品图片的函数
+// 修改updateDishImage函数
+async function updateDishImage() {
+    const dishId = document.getElementById('updateDishId').value;
+    const imageFile = document.getElementById('updateDishImage').files[0];
+    
+    if (!imageFile) {
+        alert('请选择图片');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        const response = await fetch(`${API_BASE_URL}/dishes/${dishId}/upload-image`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // 重新加载菜品列表
+            loadDishes(selectedRestaurantId);
+            document.getElementById('updateDishImageModal').style.display = 'none';
+            alert('菜品图片更新成功');
+        } else {
+            alert('更新图片失败: ' + data.message);
+        }
+    } catch (error) {
+        console.error('更新图片失败', error);
+        alert('更新图片失败，请重试');
+    }
 }
 
 // 删除餐馆
@@ -641,9 +781,82 @@ function handleLogout() {
     }
 }
 
+// 图片预览函数
+function previewImage(input, imgId, previewDivId) {
+    const preview = document.getElementById(imgId);
+    const previewDiv = document.getElementById(previewDivId);
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewDiv.style.display = 'block';
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        previewDiv.style.display = 'none';
+    }
+}
+
+// 打开更新图片模态框
+function openUpdateImageModal(restaurantId) {
+    document.getElementById('updateRestaurantId').value = restaurantId;
+    document.getElementById('updateImageModal').style.display = 'block';
+}
+
+// 处理更新餐馆图片
+async function handleUpdateRestaurantImage(e) {
+    e.preventDefault();
+    
+    const restaurantId = document.getElementById('updateRestaurantId').value;
+    const imageFile = document.getElementById('updateRestaurantImage').files[0];
+    
+    if (!imageFile) {
+        alert('请选择图片');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        const response = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}/upload-image`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // 更新本地餐馆列表中的图片
+            const restaurantIndex = restaurants.findIndex(r => r.restaurantId == restaurantId);
+            if (restaurantIndex !== -1) {
+                restaurants[restaurantIndex].src = data.data.src;
+                renderRestaurants();
+            }
+            
+            document.getElementById('updateImageModal').style.display = 'none';
+            document.getElementById('updateImageForm').reset();
+            document.getElementById('updateImagePreview').style.display = 'none';
+        } else {
+            alert('更新图片失败: ' + data.message);
+        }
+    } catch (error) {
+        console.error('更新图片失败', error);
+        alert('更新图片失败，请重试');
+    }
+}
+
 // 全局函数声明
 window.selectRestaurant = selectRestaurant;
 window.deleteRestaurant = deleteRestaurant;
 window.deleteDish = deleteDish;
 window.updateDishStock = updateDishStock;
 window.updateOrderStatus = updateOrderStatus;
+window.openUpdateImageModal = openUpdateImageModal;
+window.handleUpdateRestaurantImage = handleUpdateRestaurantImage;
+// 全局函数声明
+window.openUpdateDishImageModal = openUpdateDishImageModal;
+window.updateDishImage = updateDishImage;

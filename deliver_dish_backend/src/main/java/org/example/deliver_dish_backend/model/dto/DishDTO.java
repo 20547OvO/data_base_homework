@@ -8,10 +8,19 @@ public class DishDTO {
     private String name;
     private BigDecimal price;
     private Integer stock;
+    private String src;
+
+
 
     // 构造方法
     public DishDTO() {}
+    public String getSrc() {
+        return src;
+    }
 
+    public void setSrc(String src) {
+        this.src = src;
+    }
     // Getter和Setter方法
     public Long getDishId() { return dishId; }
     public void setDishId(Long dishId) { this.dishId = dishId; }
