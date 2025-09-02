@@ -11,7 +11,7 @@ public class Review {
     private Long reviewId;
 
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = true)
     private Order order;
 
     @ManyToOne

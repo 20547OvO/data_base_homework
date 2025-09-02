@@ -108,6 +108,11 @@ public class OrderService {
             dto.setRestaurantName(order.getRestaurant().getName());
             dto.setCustomerId(order.getCustomer().getUserId());
             dto.setTotalPrice(order.getTotalPrice());
+            dto.setCreateTime(order.getCreateTime());
+            dto.setDeliverAdd(order.getDeliverAdd());
+            dto.setPhone(order.getPhone());
+            dto.setDeliverName(order.getDeliverName());
+            dto.setAddress(order.getRestaurant().getAddress());
             // ✅ 转换 OrderItem -> OrderItemDTO
             List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -158,11 +163,15 @@ public class OrderService {
         List<Order> orders=orderRepository.findByRider_UserId(riderId);
         return orders.stream().map(order -> {
             OrderDTO dto = new OrderDTO();
+            dto.setAddress(order.getRestaurant().getAddress());
+            dto.setPhone(order.getPhone());
+            dto.setDeliverName(order.getDeliverName());
             dto.setOrderId(order.getOrderId());
             dto.setStatus(order.getStatus().name());
             dto.setRestaurantName(order.getRestaurant().getName());
             dto.setCustomerId(order.getCustomer().getUserId());
             dto.setTotalPrice(order.getTotalPrice());
+            dto.setCreateTime(order.getCreateTime());
             // ✅ 转换 OrderItem -> OrderItemDTO
             List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -201,6 +210,9 @@ public class OrderService {
         order.setRestaurant(restaurant);
         order.setStatus(Order.OrderStatus.CREATED);
         order.setCreateTime(LocalDateTime.now());
+        order.setDeliverName(orderDTO.getDeliverName());
+        order.setDeliverAdd(orderDTO.getDeliverAdd());
+        order.setPhone(orderDTO.getPhone());
 
         // 保存订单（先保存订单以获取ID）
         Order savedOrder = orderRepository.save(order);

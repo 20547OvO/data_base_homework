@@ -22,7 +22,7 @@
             <h1 class="restaurant-name" id="restaurantName">加载中...</h1>
             <div class="restaurant-meta">
                 <div class="rating" id="restaurantRating">★★★★☆ 0.0</div>
-                <div class="delivery-info">
+             <!--   <div class="delivery-info">
                     <div class="info-item">
                         <i class="fas fa-truck"></i>
                         <span id="deliveryFee">配送费 ¥0</span>
@@ -35,7 +35,7 @@
                         <i class="fas fa-yuan-sign"></i>
                         <span id="minOrder">起送 ¥0</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
         
@@ -53,6 +53,46 @@
             </div>
         </div>
     </div>
+	<!-- 在菜品列表容器之后添加评论区域 -->
+	<div class="reviews-container" id="reviewsContainer">
+	    <div class="reviews-header">
+	        <h2>用户评价</h2>
+	        <button class="add-review-btn" id="addReviewBtn">
+	            <i class="fas fa-pen"></i> 写评价
+	        </button>
+	    </div>
+	    <div class="reviews-list" id="reviewsList">
+	        <!-- 评论将通过JS动态加载 -->
+	    </div>
+	</div>
+	
+	<!-- 添加评价模态框 -->
+	<div class="modal" id="reviewModal">
+	    <div class="modal-content">
+	        <div class="modal-header">
+	            <h3>评价餐馆</h3>
+	            <span class="close" id="closeModal">&times;</span>
+	        </div>
+	        <div class="modal-body">
+	            <div class="rating-input">
+	                <span>评分:</span>
+	                <div class="star-rating">
+	                    <i class="far fa-star" data-rating="1"></i>
+	                    <i class="far fa-star" data-rating="2"></i>
+	                    <i class="far fa-star" data-rating="3"></i>
+	                    <i class="far fa-star" data-rating="4"></i>
+	                    <i class="far fa-star" data-rating="5"></i>
+	                </div>
+	                <span id="ratingValue">0</span>
+	            </div>
+	            <div class="comment-input">
+	                <label for="reviewComment">评价内容:</label>
+	                <textarea id="reviewComment" placeholder="分享您的用餐体验..." rows="4"></textarea>
+	            </div>
+	            <button class="submit-review-btn" id="submitReviewBtn">提交评价</button>
+	        </div>
+	    </div>
+	</div>
     
     <!-- 底部购物车 -->
     <div class="cart-bar" id="cartBar">

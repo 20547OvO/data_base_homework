@@ -27,6 +27,7 @@
                 <i class="fas fa-map-marker-alt"></i>
                 <div class="address-details">
                     <div class="contact">
+						
                         <span class="contact-name" id="contactName">加载中...</span>
                         <span class="contact-phone" id="contactPhone"></span>
                     </div>
@@ -89,5 +90,34 @@
     </div>
 
     <script src="checkout.js"></script>
+	<!-- 地址编辑模态框 -->
+	<div class="modal" id="addressModal">
+	    <div class="modal-content">
+	        <div class="modal-header">
+	            <h2>编辑配送地址</h2>
+	            <span class="close">&times;</span>
+	        </div>
+	        <div class="modal-body">
+	            <form id="addressForm">
+	                <div class="form-group">
+	                    <label for="contactName">收货人</label>
+	                    <input type="text" id="contactNameInput" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="contactPhone">联系电话</label>
+	                    <input type="tel" id="contactPhoneInput" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="addressInput">详细地址</label>
+	                    <textarea id="addressInput" rows="3" required></textarea>
+	                </div>
+	                <div class="form-actions">
+	                    <button type="button" class="cancel-btn" id="cancelAddressBtn">取消</button>
+	                    <button type="submit" class="save-btn">保存地址</button>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
+	</div>
 </body>
 </html>

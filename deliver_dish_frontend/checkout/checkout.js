@@ -19,10 +19,95 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('submitOrderBtn').addEventListener('click', submitOrder);
     
     // 修改地址按钮点击事件
-    document.getElementById('editAddressBtn').addEventListener('click', function() {
-        alert('地址编辑功能待实现');
-    });
+	 // 修改地址按钮点击事件
+	    document.getElementById('editAddressBtn').addEventListener('click', showAddressModal);
+	    
+	    // 模态框关闭事件
+	    document.querySelector('.close').addEventListener('click', hideAddressModal);
+	    document.getElementById('cancelAddressBtn').addEventListener('click', hideAddressModal);
+	    
+	    // 地址表单提交事件
+	    document.getElementById('addressForm').addEventListener('submit', saveAddress);
+	    
+	    // 点击模态框外部关闭
+	    document.getElementById('addressModal').addEventListener('click', function(e) {
+	        if (e.target === this) hideAddressModal();
+	    });
+	
+  
 });
+
+// 显示地址模态框
+function showAddressModal() {
+    const modal = document.getElementById('addressModal');
+    modal.style.display = 'block';
+    
+    // 填充现有地址信息
+    document.getElementById('contactNameInput').value = deliveryAddress ? deliveryAddress.contactName : (userInfo ? userInfo.username : '');
+    document.getElementById('contactPhoneInput').value = deliveryAddress ? deliveryAddress.contactPhone : (userInfo ? userInfo.phone : '');
+    document.getElementById('addressInput').value = deliveryAddress ? deliveryAddress.fullAddress : '';
+}
+
+// 隐藏地址模态框
+function hideAddressModal() {
+    document.getElementById('addressModal').style.display = 'none';
+}
+
+// 保存地址信息
+function saveAddress(e) {
+    e.preventDefault();
+    
+    const contactName = document.getElementById('contactNameInput').value.trim();
+    const contactPhone = document.getElementById('contactPhoneInput').value.trim();
+    const address = document.getElementById('addressInput').value.trim();
+    
+    // 简单验证
+    if (!contactName) {
+        alert('请输入收货人姓名');
+        return;
+    }
+    
+    if (!contactPhone ) {
+        alert('请输入正确的手机号码');
+        return;
+    }
+    
+    if (!address) {
+        alert('请输入详细地址');
+        return;
+    }
+    
+    // 更新地址信息
+    deliveryAddress = {
+        contactName,
+        contactPhone,
+        fullAddress: address
+    };
+    
+    // 更新显示
+    updateAddressDisplay();
+    
+    // 关闭模态框
+    hideAddressModal();
+}
+
+// 修改updateAddressDisplay函数以使用deliveryAddress
+function updateAddressDisplay() {
+    const contactName = document.getElementById('contactName');
+    const contactPhone = document.getElementById('contactPhone');
+    const addressText = document.getElementById('addressText');
+    
+    if (deliveryAddress) {
+        contactName.textContent = deliveryAddress.contactName;
+        contactPhone.textContent = deliveryAddress.contactPhone;
+        addressText.textContent = deliveryAddress.fullAddress;
+    } else if (userInfo) {
+        contactName.textContent = userInfo.username;
+        contactPhone.textContent = userInfo.phone;
+        addressText.textContent = '请添加配送地址';
+    }
+}
+
 
 function showError(message, elementId = null) {
     if (elementId) {
@@ -136,9 +221,13 @@ function updateOrderDisplay() {
 }
 
 async function submitOrder() {
+	
     const submitBtn = document.getElementById('submitOrderBtn');
     submitBtn.disabled = true;
     submitBtn.textContent = '提交中...';
+	
+	
+	
     
     try {
         // 获取支付方式
@@ -147,6 +236,9 @@ async function submitOrder() {
         // 准备订单数据
         const orderData = {
             customerId: userInfo.userId,
+			deliverAdd: deliveryAddress.fullAddress,
+			deliverName: deliveryAddress.contactName,
+			phone: deliveryAddress.contactPhone,
             restaurantId: restaurant.restaurantId,
             totalPrice: cart.total + (restaurant.deliveryFee || 0),
             status: 'CREATED',
@@ -184,7 +276,7 @@ async function submitOrder() {
         
     } catch (error) {
         console.error('提交订单失败:', error);
-        showError(error.message || '提交订单失败，请重试');
+        showError(error.message+'请检查订单地址联系电话是否正确填写' || '提交订单失败，请重试');
         submitBtn.disabled = false;
         submitBtn.textContent = '提交订单';
     }

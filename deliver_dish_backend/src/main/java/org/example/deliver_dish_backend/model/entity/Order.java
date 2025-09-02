@@ -23,14 +23,44 @@ public class Order {
     @JoinColumn(name = "rider_id")
     private User rider;
 
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.CREATED;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
     @Column(precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
+    private String deliverName;
+
+    public String getDeliverName() {
+        return deliverName;
+    }
+
+    public void setDeliverName(String deliverName) {
+        this.deliverName = deliverName;
+    }
+
+    public String getDeliverAdd() {
+        return deliverAdd;
+    }
+
+    public void setDeliverAdd(String deliverAdd) {
+        this.deliverAdd = deliverAdd;
+    }
+
     @Column(updatable = false)
     private LocalDateTime createTime;
+
+    private String deliverAdd;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
@@ -42,11 +72,13 @@ public class Order {
     // 构造方法
     public Order() {}
 
-    public Order(User customer, Restaurant restaurant, OrderStatus status, BigDecimal totalPrice) {
+    public Order(User customer, Restaurant restaurant, OrderStatus status, BigDecimal totalPrice,String deliverAdd,String deliverName) {
         this.customer = customer;
         this.restaurant = restaurant;
         this.status = status;
         this.totalPrice = totalPrice;
+        this.deliverAdd=deliverAdd;
+        this.deliverName=deliverName;
     }
 
     @PrePersist

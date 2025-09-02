@@ -14,6 +14,45 @@ public class OrderDTO {
     private BigDecimal totalPrice;
     private LocalDateTime createTime;
     private List<OrderItemDTO> items;
+    private String deliverAdd;
+    private String deliverName;
+    private String phone;
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getDeliverName() {
+        return deliverName;
+    }
+
+    public void setDeliverName(String deliverName) {
+        this.deliverName = deliverName;
+    }
+
+
+
+    public String getDeliverAdd() {
+        
+        return deliverAdd;
+    }
+
+    public void setDeliverAdd(String deliverAdd) {
+        this.deliverAdd = deliverAdd;
+    }
 
     // 构造方法
     public OrderDTO() {}

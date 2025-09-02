@@ -132,17 +132,19 @@ function renderAvailableOrders() {
         <div class="order-card" data-order-id="${order.orderId}">
             <div class="order-header">
                 <span class="order-id">订单 #${order.orderId}</span>
-                <span class="order-time">${formatDate(order.createdAt)}</span>
+                <span class="order-time">${formatDate(order.createTime)}</span>
             </div>
             <div class="order-restaurant">${order.restaurantName}</div>
             <div class="order-detail">
                 <span class="order-items">${getOrderItemsText(order.items)}</span>
                 <span class="order-price">¥${order.totalPrice.toFixed(2)}</span>
             </div>
-            <div class="order-address">📍 ${order.deliveryAddress}</div>
+            <div class="order-address">📍 ${order.address} 至 ${order.deliverAdd}</div>
+			<div class="order-address"> 联系人${order.deliverName} 联系人电话${order.phone}</div>
+			
             <div class="order-actions">
                 <button class="btn btn-accept" onclick="acceptOrder(${order.orderId})">接单</button>
-                <button class="btn btn-details" onclick="showOrderDetails(${order.orderId}, 'available')">查看详情</button>
+                
             </div>
         </div>
     `).join('');
@@ -185,17 +187,18 @@ function renderMyTasks() {
         <div class="order-card" data-order-id="${task.orderId}">
             <div class="order-header">
                 <span class="order-id">订单 #${task.orderId} <span class="status-badge ${statusClass}">${statusText}</span></span>
-                <span class="order-time">${formatDate(task.createdAt)}</span>
+                <span class="order-time">${formatDate(task.createTime)}</span>
             </div>
             <div class="order-restaurant">${task.restaurantName}</div>
             <div class="order-detail">
                 <span class="order-items">${getOrderItemsText(task.items)}</span>
                 <span class="order-price">¥${task.totalPrice.toFixed(2)}</span>
             </div>
-            <div class="order-address">📍 ${task.deliveryAddress}</div>
+            <div class="order-address">📍 ${task.address} 至 ${task.deliverAdd}</div>
+			<div class="order-address"> 联系人${task.deliverName} 联系人电话${task.deliverAdd}</div>
             <div class="order-actions">
                 ${actionButton}
-                <button class="btn btn-details" onclick="showOrderDetails(${task.orderId}, 'mytask')">查看详情</button>
+              
             </div>
         </div>
         `;
@@ -285,96 +288,7 @@ async function updateOrderStatus(orderId, newStatus) {
     }
 }
 
-// 显示订单详情
-async function showOrderDetails(orderId, type) {
-    try {
-        const token = localStorage.getItem('token');
-        let order;
-        
-        if (type === 'available') {
-            order = availableOrders.find(o => o.orderId === orderId);
-        } else {
-            order = myTasks.find(o => o.orderId === orderId);
-        }
-        
-        // 如果本地没有找到订单详情，尝试从API获取
-        if (!order) {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                order = result.data;
-            }
-        }
-        
-        if (order) {
-            modalTitle.textContent = `订单详情 #${order.orderId}`;
-            
-            // 获取订单项详情
-            const itemsResponse = await fetch(`http://localhost:8080/api/orders/${orderId}/items`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            let itemsHtml = '';
-            if (itemsResponse.ok) {
-                const itemsResult = await itemsResponse.json();
-                itemsHtml = itemsResult.data.map(item => 
-                    `${item.dishName} x${item.quantity} (¥${item.price.toFixed(2)})`
-                ).join('<br>');
-            } else {
-                itemsHtml = getOrderItemsText(order.items);
-            }
-            
-            modalBody.innerHTML = `
-                <div class="order-detail-item">
-                    <div class="order-detail-label">餐厅</div>
-                    <div>${order.restaurantName}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">菜品</div>
-                    <div>${itemsHtml}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">总价</div>
-                    <div>¥${order.totalPrice.toFixed(2)}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">顾客信息</div>
-                    <div>${order.customerName || '顾客'} (${order.customerPhone || '电话未提供'})</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">餐厅地址</div>
-                    <div>${order.restaurantAddress || '地址未提供'}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">配送地址</div>
-                    <div>${order.deliveryAddress}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">下单时间</div>
-                    <div>${formatDate(order.createdAt)}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">订单状态</div>
-                    <div>${getStatusText(order.status)}</div>
-                </div>
-            `;
-            
-            orderModal.style.display = 'block';
-        } else {
-            alert('无法获取订单详情');
-        }
-    } catch (error) {
-        console.error('获取订单详情时出错:', error);
-        alert('获取订单详情失败');
-    }
-}
+
 
 // 辅助函数 - 获取订单项文本
 function getOrderItemsText(items) {
