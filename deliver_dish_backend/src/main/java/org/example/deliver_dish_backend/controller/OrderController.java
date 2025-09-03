@@ -7,10 +7,13 @@ import org.example.deliver_dish_backend.model.entity.OrderItem;
 import org.example.deliver_dish_backend.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.jaxb.SpringDataJaxb;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -88,10 +91,64 @@ public class OrderController {
     }
 
     @GetMapping("/restaurant/{restaurantId}")
-    public ResponseEntity<?> getOrdersByRestaurantId(@PathVariable Long restaurantId) {
-        List<OrderDTO> orders = orderService.getOrdersByRestaurantId(restaurantId);
+    public ResponseEntity<?> getOrdersByRestaurantId(
+            @PathVariable Long restaurantId,
+            @RequestParam(required = false) Integer days) {
+        
+        List<OrderDTO> orders;
+        
+        // 如果提供了天数参数，获取该时间段内的订单
+        if (days != null) {
+            // 注意：这里需要在OrderService中添加一个支持日期范围的方法
+            // 目前先返回所有订单，后续可以根据需求完善
+            orders = orderService.getOrdersByRestaurantId(restaurantId);
+        } else {
+            // 否则返回所有订单
+            orders = orderService.getOrdersByRestaurantId(restaurantId);
+        }
+        
         System.out.println("thisorders"+orders);
         return ResponseEntity.ok(ApiResponse.success("获取成功", orders));
+    }
+
+    /**
+     * 获取特定餐厅的菜品销售统计
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（可选）
+     * @param endDate 结束日期（可选）
+     * @return 包含菜品销售统计信息的响应
+     */
+    @GetMapping("/restaurant/{restaurantId}/statistics")
+    public ResponseEntity<?> getDishSalesStatistics(@PathVariable Long restaurantId,
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        try {
+            List<Map<String, Object>> statistics = orderService.getDishSalesStatistics(restaurantId, startDate, endDate);
+            return ResponseEntity.ok(ApiResponse.success("获取成功", statistics));
+        } catch (Exception e) {
+            System.err.println("获取菜品销售统计失败: " + e.getMessage());
+            return ResponseEntity.status(500).body(ApiResponse.error("获取菜品销售统计失败"));
+        }
+    }
+
+    /**
+     * 获取特定餐厅的销售摘要
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（可选）
+     * @param endDate 结束日期（可选）
+     * @return 包含销售摘要信息的响应
+     */
+    @GetMapping("/restaurant/{restaurantId}/summary")
+    public ResponseEntity<?> getSalesSummary(@PathVariable Long restaurantId,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        try {
+            Map<String, Object> summary = orderService.getSalesSummary(restaurantId, startDate, endDate);
+            return ResponseEntity.ok(ApiResponse.success("获取成功", summary));
+        } catch (Exception e) {
+            System.err.println("获取销售摘要失败: " + e.getMessage());
+            return ResponseEntity.status(500).body(ApiResponse.error("获取销售摘要失败"));
+        }
     }
 
     @GetMapping("/rider/{riderId}")

@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,11 +80,13 @@ public class OrderService {
         return orders.stream().map(order -> {
             OrderDTO dto = new OrderDTO();
             dto.setOrderId(order.getOrderId());
+            dto.setRestaurantId(order.getRestaurant().getRestaurantId());
+            System.out.println("本次设定的餐馆id为"+order.getRestaurant().getRestaurantId());
             dto.setStatus(order.getStatus().name());
             dto.setRestaurantName(order.getRestaurant().getName());
             dto.setCustomerId(order.getCustomer().getUserId());
             dto.setTotalPrice(order.getTotalPrice());
-            dto.setCreateTime(LocalDateTime.now());
+            dto.setCreateTime(order.getCreateTime());
             // ✅ 转换 OrderItem -> OrderItemDTO
             List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
                 OrderItemDTO itemDTO = new OrderItemDTO();
@@ -140,6 +142,7 @@ public class OrderService {
             dto.setStatus(order.getStatus().name());
             System.out.println("这次的订单转台为"+order.getStatus().name());
             dto.setOrderId(order.getOrderId());
+            dto.setCreateTime(order.getCreateTime());
             dto.setStatus(order.getStatus().name());
             dto.setRestaurantName(order.getRestaurant().getName());
             dto.setCustomerId(order.getCustomer().getUserId());
@@ -265,6 +268,98 @@ public class OrderService {
 
             return orderRepository.save(order);
         }).orElse(null);
+    }
+
+    /**
+     * 统计特定餐厅的菜品销售数量
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（可选）
+     * @param endDate 结束日期（可选）
+     * @return 包含菜品销售统计信息的Map列表
+     */
+    public List<Map<String, Object>> getDishSalesStatistics(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
+        // 获取餐厅的所有订单项
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_Restaurant_RestaurantId(restaurantId);
+        
+        // 如果提供了日期范围，则过滤订单项
+        if (startDate != null && endDate != null) {
+            orderItems = orderItems.stream()
+                .filter(item -> {
+                    LocalDateTime orderTime = item.getOrder().getCreateTime();
+                    return !orderTime.isBefore(startDate) && !orderTime.isAfter(endDate);
+                })
+                .collect(Collectors.toList());
+        }
+        
+        // 按菜品ID分组并计算销售数量
+        Map<Long, Map<String, Object>> dishSalesMap = new HashMap<>();
+        
+        for (OrderItem item : orderItems) {
+            Long dishId = item.getDish().getDishId();
+            String dishName = item.getDish().getName();
+            BigDecimal dishPrice = item.getDish().getPrice();
+            int quantity = item.getQuantity();
+            
+            // 计算该订单项的销售额
+            BigDecimal itemRevenue = dishPrice.multiply(BigDecimal.valueOf(quantity));
+            
+            if (dishSalesMap.containsKey(dishId)) {
+                // 已存在该菜品，累加数量和销售额
+                Map<String, Object> dishInfo = dishSalesMap.get(dishId);
+                int currentQuantity = (int) dishInfo.get("quantity");
+                BigDecimal currentRevenue = (BigDecimal) dishInfo.get("revenue");
+                
+                dishInfo.put("quantity", currentQuantity + quantity);
+                dishInfo.put("revenue", currentRevenue.add(itemRevenue));
+            } else {
+                // 不存在该菜品，创建新的统计记录
+                Map<String, Object> dishInfo = new HashMap<>();
+                dishInfo.put("dishId", dishId);
+                dishInfo.put("dishName", dishName);
+                dishInfo.put("price", dishPrice);
+                dishInfo.put("quantity", quantity);
+                dishInfo.put("revenue", itemRevenue);
+                
+                dishSalesMap.put(dishId, dishInfo);
+            }
+        }
+        
+        // 转换为列表并排序（按销售数量降序）
+        return dishSalesMap.values().stream()
+            .sorted((a, b) -> ((Integer) b.get("quantity")).compareTo((Integer) a.get("quantity")))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取特定餐厅的销售统计摘要
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（可选）
+     * @param endDate 结束日期（可选）
+     * @return 包含销售摘要信息的Map
+     */
+    public Map<String, Object> getSalesSummary(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
+        // 获取菜品销售统计
+        List<Map<String, Object>> dishSales = getDishSalesStatistics(restaurantId, startDate, endDate);
+        
+        // 计算总销售数量和总销售额
+        int totalQuantity = dishSales.stream()
+            .mapToInt(item -> (int) item.get("quantity"))
+            .sum();
+        
+        BigDecimal totalRevenue = dishSales.stream()
+            .map(item -> (BigDecimal) item.get("revenue"))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        // 找出最畅销的菜品
+        Map<String, Object> bestSellingDish = dishSales.isEmpty() ? null : dishSales.get(0);
+        
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalQuantity", totalQuantity);
+        summary.put("totalRevenue", totalRevenue);
+        summary.put("bestSellingDish", bestSellingDish);
+        summary.put("dishCount", dishSales.size());
+        
+        return summary;
     }
 
 //    public Order assignRider(Long orderId, Long riderId) {

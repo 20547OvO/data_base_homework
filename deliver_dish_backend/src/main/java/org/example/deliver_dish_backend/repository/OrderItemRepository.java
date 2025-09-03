@@ -10,4 +10,7 @@ import java.util.List;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 //    List<OrderItem> findByOrderOrderId(Long orderId);
     List<OrderItem> findByOrder_OrderId(Long orderId);
+    
+    // 根据餐厅ID查找所有订单项
+    List<OrderItem> findByOrder_Restaurant_RestaurantId(Long restaurantId);
 }

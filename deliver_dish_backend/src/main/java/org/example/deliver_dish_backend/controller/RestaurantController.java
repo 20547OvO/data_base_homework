@@ -5,14 +5,18 @@ import org.example.deliver_dish_backend.model.dto.ApiResponse;
 import org.example.deliver_dish_backend.model.dto.RestaurantRequest;
 import org.example.deliver_dish_backend.model.entity.Restaurant;
 import org.example.deliver_dish_backend.service.RestaurantService;
+import org.example.deliver_dish_backend.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -21,6 +25,9 @@ import java.util.Optional;
 public class RestaurantController {
     @Autowired
     private RestaurantService restaurantService;
+    
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping
     public ResponseEntity<?> getAllRestaurants() {
@@ -107,6 +114,87 @@ public class RestaurantController {
             return ResponseEntity.ok(ApiResponse.success("删除成功"));
         } else {
             return ResponseEntity.badRequest().body(ApiResponse.error("餐厅不存在"));
+        }
+    }
+    
+    /**
+     * 获取餐厅菜品销售统计数据
+     * @param restaurantId 餐厅ID
+     * @param days 天数范围（可选，默认30天）
+     * @return 菜品销售统计数据
+     */
+    @GetMapping("/{restaurantId}/dish-sales")
+    public ResponseEntity<?> getDishSalesStatistics(
+            @PathVariable Long restaurantId,
+            @RequestParam(defaultValue = "30") Integer days) {
+        
+        try {
+            // 根据天数计算日期范围
+            LocalDateTime end = LocalDateTime.now();
+            LocalDateTime start = end.minusDays(days);
+            
+            // 调用服务层方法获取统计数据
+            List<Map<String, Object>> statistics = orderService.getDishSalesStatistics(restaurantId, start, end);
+            
+            return ResponseEntity.ok(ApiResponse.success("获取菜品销售统计成功", statistics));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("获取菜品销售统计失败: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * 获取餐厅菜品销售统计数据（兼容原始格式）
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @param endDate 结束日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @return 菜品销售统计数据
+     */
+    @GetMapping("/{restaurantId}/sales/statistics")
+    public ResponseEntity<?> getDishSalesStatisticsWithDateRange(
+            @PathVariable Long restaurantId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
+        try {
+            // 格式化日期参数
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate, formatter) : null;
+            LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate, formatter) : null;
+            
+            // 调用服务层方法获取统计数据
+            List<Map<String, Object>> statistics = orderService.getDishSalesStatistics(restaurantId, start, end);
+            
+            return ResponseEntity.ok(ApiResponse.success("获取菜品销售统计成功", statistics));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("获取菜品销售统计失败: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * 获取餐厅销售统计摘要
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @param endDate 结束日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @return 销售统计摘要
+     */
+    @GetMapping("/{restaurantId}/sales/summary")
+    public ResponseEntity<?> getSalesSummary(
+            @PathVariable Long restaurantId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
+        try {
+            // 格式化日期参数
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate, formatter) : null;
+            LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate, formatter) : null;
+            
+            // 调用服务层方法获取统计摘要
+            Map<String, Object> summary = orderService.getSalesSummary(restaurantId, start, end);
+            
+            return ResponseEntity.ok(ApiResponse.success("获取销售统计摘要成功", summary));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("获取销售统计摘要失败: " + e.getMessage()));
         }
     }
 }

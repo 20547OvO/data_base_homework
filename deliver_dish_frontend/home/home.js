@@ -4,6 +4,12 @@
 //         window.location.href = '../login/login.html';
 //         return;
 //     };
+// 显示错误信息
+function showError(message) {
+  alert(message);
+  console.error(message);
+}
+
 // 页面加载时执行
 document.addEventListener('DOMContentLoaded', function() {
   // 检查用户登录状态
@@ -201,7 +207,7 @@ function displayCurrentOrders(orders) {
   const ordersContainer = document.querySelector('.orders-container');
   ordersContainer.innerHTML = '';
   
-  if (orders.length === 0) {
+  if (!orders || orders.length === 0) {
     ordersContainer.innerHTML = '<p class="no-orders">暂无进行中的订单</p>';
     return;
   }
@@ -209,7 +215,9 @@ function displayCurrentOrders(orders) {
   orders.forEach(order => {
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
-	const totalItemCount = order.items.reduce((total, item) => total + item.quantity, 0);
+	const totalItemCount = (order.items && order.items.length > 0) 
+	  ? order.items.reduce((total, item) => total + (item.quantity || 0), 0) 
+	  : order.itemCount || 0;
     
     orderCard.innerHTML = `
       <div class="order-header">
@@ -239,6 +247,9 @@ async function loadHistoryOrders() {
     const timeRange = document.getElementById('timeRange').value;
     const restaurantFilter = document.getElementById('restaurantFilter').value;
     
+    // 加载餐厅列表到下拉框
+    await loadRestaurantsToFilter();
+    
     const response = await fetch(
       `http://localhost:8080/api/orders/customer/${userId}/history`, 
       {
@@ -250,16 +261,96 @@ async function loadHistoryOrders() {
     
     if (response.ok) {
       const orders = await response.json();
-      displayHistoryOrders(orders.data);
+      // 应用筛选条件
+      const filteredOrders = applyFilters(orders.data, timeRange, restaurantFilter);
+      displayHistoryOrders(filteredOrders);
     } else {
       console.error('获取历史订单失败');
     }
   } catch (error) {
     console.error('加载历史订单时出错:', error);
     // 使用模拟数据作为后备
-    displayHistoryOrders(getMockHistoryOrders());
+    const timeRange = document.getElementById('timeRange').value;
+    const restaurantFilter = document.getElementById('restaurantFilter').value;
+    await loadRestaurantsToFilter();
+    const mockOrders = getMockHistoryOrders();
+    const filteredOrders = applyFilters(mockOrders, timeRange, restaurantFilter);
+    displayHistoryOrders(filteredOrders);
   }
 }
+
+// 加载餐厅列表到筛选下拉框
+async function loadRestaurantsToFilter() {
+  try {
+    const restaurantSelect = document.getElementById('restaurantFilter');
+    // 清空现有选项（保留第一个"所有餐厅"选项）
+    while (restaurantSelect.options.length > 1) {
+      restaurantSelect.remove(1);
+    }
+    
+    const response = await fetch('http://localhost:8080/api/restaurants');
+    
+    if (response.ok) {
+      const restaurants = await response.json();
+      // 添加餐厅选项
+      restaurants.data.forEach(restaurant => {
+        const option = document.createElement('option');
+        option.value = restaurant.restaurantId;
+        option.textContent = restaurant.name;
+        restaurantSelect.appendChild(option);
+      });
+    } else {
+      console.error('获取餐厅列表失败');
+      // 使用模拟数据
+      const mockRestaurants = getMockRestaurants();
+      mockRestaurants.forEach(restaurant => {
+        const option = document.createElement('option');
+        option.value = restaurant.id;
+        option.textContent = restaurant.name;
+        restaurantSelect.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('加载餐厅筛选列表时出错:', error);
+  }
+}
+
+// 应用筛选条件
+function applyFilters(orders, timeRange, restaurantFilter) {
+  let filtered = [...orders];
+  console.log("这次的餐馆数据为: ", JSON.stringify(orders, null, 2));
+
+  // 应用时间范围筛选
+  if (timeRange) {
+    const months = parseInt(timeRange);
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    console.log("时间筛选：过去", months, "个月，截止日期=", cutoffDate.toISOString());
+
+    filtered = filtered.filter(order => {
+      const orderDate = new Date(order.createTime || order.orderTime);
+      console.log("订单时间=", order.createTime || order.orderTime, " => ", orderDate.toISOString());
+      return orderDate >= cutoffDate;
+    });
+  }
+
+  // 应用餐厅筛选
+  if (restaurantFilter && restaurantFilter !== 'all') {
+    console.log("筛选餐馆条件: ", restaurantFilter, " (类型=", typeof restaurantFilter, ")");
+    filtered = filtered.filter(order => {
+      console.log("检查订单: restaurantId=", order.restaurantId, 
+                  "(类型=", typeof order.restaurantId, ")",
+                  " restaurantName=", order.restaurantName,
+                  " vs 过滤条件=", restaurantFilter);
+
+      return order.restaurantId == restaurantFilter || order.restaurantName == restaurantFilter;
+    });
+  }
+
+  console.log("最终筛选结果数量: ", filtered.length);
+  return filtered;
+}
+
 
 // 显示历史订单
 function displayHistoryOrders(orders) {
@@ -360,8 +451,59 @@ function getMockCurrentOrders() {
 }
 
 function getMockHistoryOrders() {
+  // 生成过去6个月内的随机日期
+  function getRandomDateInMonths(months) {
+    const now = new Date();
+    const pastDate = new Date();
+    pastDate.setMonth(now.getMonth() - months);
+    
+    // 生成两个日期之间的随机日期
+    const randomTime = pastDate.getTime() + Math.random() * (now.getTime() - pastDate.getTime());
+    return new Date(randomTime);
+  }
+  
+  // 格式化日期为ISO字符串
+  function formatDate(date) {
+    return date.toISOString();
+  }
+  
+  // 模拟历史订单数据，包含不同时间和餐厅的订单
   return [
-    { id: 123454, status: "completed", restaurantName: "香香炸鸡店", itemCount: 2, totalPrice: 45.00, createTime: "2023-10-15T18:30:00" },
-    { id: 123453, status: "completed", restaurantName: "甜蜜甜品屋", itemCount: 1, totalPrice: 25.00, createTime: "2023-10-10T20:15:00" }
+    { 
+      id: 123454, 
+      restaurantId: 1, // 对应美味汉堡店
+      status: "completed", 
+      restaurantName: "美味汉堡店", 
+      items: [{quantity: 2}, {quantity: 1}], // 用于计算商品总数
+      totalPrice: 45.00, 
+      createTime: formatDate(getRandomDateInMonths(1)) // 最近一个月
+    },
+    { 
+      id: 123455, 
+      restaurantId: 2, // 对应意式披萨坊
+      status: "completed", 
+      restaurantName: "意式披萨坊", 
+      items: [{quantity: 1}], 
+      totalPrice: 38.00, 
+      createTime: formatDate(getRandomDateInMonths(2)) // 最近两个月内
+    },
+    { 
+      id: 123456, 
+      restaurantId: 3, // 对应香香炸鸡店
+      status: "completed", 
+      restaurantName: "香香炸鸡店", 
+      items: [{quantity: 2}], 
+      totalPrice: 52.00, 
+      createTime: formatDate(getRandomDateInMonths(3)) // 最近三个月内
+    },
+    { 
+      id: 123457, 
+      restaurantId: 4, // 对应甜蜜甜品屋
+      status: "completed", 
+      restaurantName: "甜蜜甜品屋", 
+      items: [{quantity: 3}], 
+      totalPrice: 28.00, 
+      createTime: formatDate(getRandomDateInMonths(5)) // 最近五个月内
+    }
   ];
 }

@@ -3,64 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>餐馆销售数据分析</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <link rel="stylesheet" href="restaurant_analytics.css">
+    <title>菜品销量分析 - 美食送</title>
+    <!-- 主要CDN链接 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <!-- 备用CDN链接，当主链接加载失败时使用 -->
+    <script>window.echarts || document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>')</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #0097ff 0%, #005bb9 100%);
+            color: white;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .restaurant-info {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .restaurant-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #0097ff;
+        }
+
+        .stat-card.total-sales i { color: #ff6b6b; }
+        .stat-card.avg-price i { color: #4ecdc4; }
+        .stat-card.popular i { color: #ff9f43; }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #222;
+        }
+
+        .stat-label {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            padding: 20px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-btn.active {
+            background-color: #0097ff;
+            color: white;
+            border-color: #0097ff;
+        }
+
+        .chart {
+            height: 500px;
+            margin-top: 20px;
+        }
+
+        .dishes-list {
+            padding: 20px;
+        }
+
+        .dishes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .dishes-table th, .dishes-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dishes-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .dishes-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .rank {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .rank-1 { background-color: #ffd700; color: white; }
+        .rank-2 { background-color: #c0c0c0; color: white; }
+        .rank-3 { background-color: #cd7f32; color: white; }
+
+        .sales-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .sales-progress {
+            height: 100%;
+            background-color: #0097ff;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart {
+                height: 300px;
+            }
+            
+            .dishes-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        /* 添加控制面板样式 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .refresh-button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .refresh-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>餐馆销售数据分析</h1>
-            <a href="../owner_home/owner_home.html" class="back-btn">返回管理页面</a>
+            <a href="../owner_home/owner_home.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回首页
+            </a>
+            <div class="header-title">餐馆数据分析</div>
+            <div></div> <!-- 占位元素 -->
         </div>
         
+        <div class="restaurant-info">
+            <h1 class="restaurant-name">川味小馆 - 菜品销量分析</h1>
+            <p>数据统计时间: 2023年10月1日 - 2023年10月31日</p>
+        </div>
+
+        <!-- 添加控制面板 -->
         <div class="controls">
-            <div>
-                <label for="timeRange">时间范围：</label>
+            <div class="control-group">
+                <label for="timeRange">时间范围:</label>
                 <select id="timeRange">
                     <option value="7">最近7天</option>
                     <option value="30" selected>最近30天</option>
-                    <option value="90">最近3个月</option>
-                    <option value="365">最近1年</option>
-                    <option value="all">全部时间</option>
+                    <option value="90">最近90天</option>
+                    <option value="180">最近半年</option>
+                    <option value="365">最近一年</option>
                 </select>
             </div>
-            
-            <div>
-                <label for="sortBy">排序方式：</label>
+            <div class="control-group">
+                <label for="sortBy">排序方式:</label>
                 <select id="sortBy">
-                    <option value="quantity" selected>销售数量</option>
-                    <option value="name">菜品名称</option>
+                    <option value="quantity" selected>按销量</option>
+                    <option value="name">按名称</option>
+                    <option value="revenue">按销售额</option>
                 </select>
             </div>
-            
-            <button id="refreshBtn">刷新数据</button>
+            <button class="refresh-button" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> 刷新数据
+            </button>
         </div>
         
-        <div id="chartContainer" class="chart-container">
-            <div class="loading">加载中...</div>
+        <div class="stats-cards">
+            <div class="stat-card total-sales">
+                <i class="fas fa-chart-line"></i>
+                <div class="stat-value" id="total-sales">0</div>
+                <div class="stat-label">总销量</div>
+            </div>
+            <div class="stat-card avg-price">
+                <i class="fas fa-tag"></i>
+                <div class="stat-value" id="avg-price">¥0.00</div>
+                <div class="stat-label">平均价格</div>
+            </div>
+            <div class="stat-card popular">
+                <i class="fas fa-utensils"></i>
+                <div class="stat-value" id="top-dish">无数据</div>
+                <div class="stat-label">最受欢迎菜品</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-money-bill-wave"></i>
+                <div class="stat-value" id="total-revenue">¥0</div>
+                <div class="stat-label">总销售额</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-calendar-day"></i>
+                <div class="stat-value" id="avg-daily">0</div>
+                <div class="stat-label">平均每日销量</div>
+            </div>
         </div>
         
-        <div class="statistics">
-            <div class="stat-card">
-                <h3>总销售菜品数</h3>
-                <div class="value" id="totalDishes">0</div>
+        <div class="chart-container">
+            <div class="chart-title">
+                <span>菜品销量分布</span>
+                <div class="chart-actions">
+                    <button class="chart-btn active" id="viewPie">饼图视图</button>
+                    <button class="chart-btn" id="viewBar">条形图视图</button>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>总销售额</h3>
-                <div class="value" id="totalRevenue">¥0.00</div>
-            </div>
-            <div class="stat-card">
-                <h3>最受欢迎菜品</h3>
-                <div class="value" id="topDish">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>平均每日销量</h3>
-                <div class="value" id="avgDaily">0</div>
-            </div>
+            <div id="salesChart" class="chart"></div>
+        </div>
+        
+        <div class="dishes-list">
+            <div class="chart-title">菜品销量排行</div>
+            <table class="dishes-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>菜品名称</th>
+                        <th>价格</th>
+                        <th>销量</th>
+                        <th>占比</th>
+                    </tr>
+                </thead>
+                <tbody id="dishesTableBody">
+                    <!-- 将通过JS动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 美食送 - 餐馆数据分析系统 | 数据更新于: 2023-11-05 08:30</p>
         </div>
     </div>
 
+    <!-- 引入外部的JavaScript文件 -->
     <script src="restaurant_analytics.js"></script>
 </body>
 </html>

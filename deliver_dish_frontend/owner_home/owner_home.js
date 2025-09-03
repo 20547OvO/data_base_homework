@@ -471,7 +471,7 @@ function renderOrders() {
 			<div class="card-content">
 				<p>顾客: ${order.customer_name || `ID: ${order.customerId}`}</p>
 				<p>总价: ¥${order.totalPrice.toFixed(2)}</p>
-				<p>下单时间: ${formatDateTime(order.create_time)}</p>
+				<p>下单时间: ${formatDateTime(order.createTime)}</p>
 				
 				<div class="order-items">
 					<strong>订单内容:</strong>
