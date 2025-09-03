@@ -354,12 +354,20 @@ function renderRestaurants() {
                 <p>${restaurant.description || '暂无描述'}</p>
             </div>
             <div class="card-footer">
+			    <button class="btn btn-secondary" onclick="viewRestaurantData(${restaurant.restaurantId})">查看数据</button>
+			
                 <button class="btn btn-primary" onclick="selectRestaurant(${restaurant.restaurantId})">管理餐馆</button>
             </div>
         </div>
     `).join('');
 }
-
+// 查看餐馆数据
+function viewRestaurantData(restaurantId) {
+    // 保存当前餐馆ID到localStorage，以便在数据分析页面使用
+    localStorage.setItem('analytics_restaurant_id', restaurantId);
+    // 跳转到数据分析页面
+    window.location.href = '../restaurant_analytics/restaurant_analytics.html';
+}
 
 // 渲染菜品列表
 // 修改renderDishes函数以显示菜品图片

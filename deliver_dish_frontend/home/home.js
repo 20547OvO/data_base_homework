@@ -153,7 +153,49 @@ async function getRestaurantsAverageRatings(restaurants) {
   await Promise.all(ratingPromises);
   return ratings;
 }
+// 加载当前订单
+async function loadCurrentOrders() {
+  try {
+	  const userId = localStorage.getItem('user_id');
+	  if (!userId) {
+	      showError('用户未登录，请先登录');
+	      window.location.href = '../login/login.html';
+	      return;
+	  };
 
+	
+   const response = await fetch(`http://localhost:8080/api/orders/customer/${userId}/current`, {
+     headers: {
+       // 'Authorization': `Bearer ${user.token}`
+     }
+    });
+	
+	 // const rawResponse = await response.text();
+	 //    console.log('原始响应文本:', rawResponse); // 这里可以看到有问题的JSON
+	if (response.ok) {
+	  console.log("开始打印数据1111111");
+	  const orders = await response.json();
+	  console.log("完整响应:", orders.data); // 打印完整响应
+	  
+	  displayCurrentOrders(orders.data);
+	} else {
+	  console.error("请求失败:", response.status);
+	}
+    
+   //  if (response.ok) {
+	  //  console.log("开始打印数据1111111");
+   //    const orders = await response.json();
+	  // console.log("aaaaabbbbbcccc"+JSON.stringify(orders.data))
+   //    displayCurrentOrders(orders);
+   //  } else {
+   //    console.error('获取当前订单失败');
+   //  }
+  } catch (error) {
+    console.error('加载订单时出错:', error);
+    // 使用模拟数据作为后备
+    displayCurrentOrders(getMockCurrentOrders());
+  }
+}
 // 显示当前订单
 function displayCurrentOrders(orders) {
   const ordersContainer = document.querySelector('.orders-container');
