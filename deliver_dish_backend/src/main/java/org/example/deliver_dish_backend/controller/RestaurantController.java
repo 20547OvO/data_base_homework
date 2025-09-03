@@ -173,12 +173,37 @@ public class RestaurantController {
     /**
      * 获取餐厅销售统计摘要
      * @param restaurantId 餐厅ID
-     * @param startDate 开始日期（格式：yyyy-MM-dd HH:mm:ss）
-     * @param endDate 结束日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @param days 天数范围（可选，默认30天）
      * @return 销售统计摘要
      */
     @GetMapping("/{restaurantId}/sales/summary")
     public ResponseEntity<?> getSalesSummary(
+            @PathVariable Long restaurantId,
+            @RequestParam(defaultValue = "30") Integer days) {
+        
+        try {
+            // 根据天数计算日期范围
+            LocalDateTime end = LocalDateTime.now();
+            LocalDateTime start = end.minusDays(days);
+            
+            // 调用服务层方法获取统计摘要
+            Map<String, Object> summary = orderService.getSalesSummaryAsMap(restaurantId, start, end);
+            
+            return ResponseEntity.ok(ApiResponse.success("获取销售统计摘要成功", summary));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("获取销售统计摘要失败: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * 获取餐厅销售统计摘要（兼容原始格式）
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @param endDate 结束日期（格式：yyyy-MM-dd HH:mm:ss）
+     * @return 销售统计摘要
+     */
+    @GetMapping("/{restaurantId}/sales/summary/date-range")
+    public ResponseEntity<?> getSalesSummaryWithDateRange(
             @PathVariable Long restaurantId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
@@ -190,7 +215,7 @@ public class RestaurantController {
             LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate, formatter) : null;
             
             // 调用服务层方法获取统计摘要
-            Map<String, Object> summary = orderService.getSalesSummary(restaurantId, start, end);
+            Map<String, Object> summary = orderService.getSalesSummaryAsMap(restaurantId, start, end);
             
             return ResponseEntity.ok(ApiResponse.success("获取销售统计摘要成功", summary));
         } catch (Exception e) {

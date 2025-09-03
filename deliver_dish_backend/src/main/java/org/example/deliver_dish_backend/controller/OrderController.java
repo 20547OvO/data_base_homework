@@ -143,7 +143,7 @@ public class OrderController {
                                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
                                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         try {
-            Map<String, Object> summary = orderService.getSalesSummary(restaurantId, startDate, endDate);
+            Map<String, Object> summary = orderService.getSalesSummaryAsMap(restaurantId, startDate, endDate);
             return ResponseEntity.ok(ApiResponse.success("获取成功", summary));
         } catch (Exception e) {
             System.err.println("获取销售摘要失败: " + e.getMessage());

@@ -195,7 +195,7 @@ function renderMyTasks() {
                 <span class="order-price">¥${task.totalPrice.toFixed(2)}</span>
             </div>
             <div class="order-address">📍 ${task.address} 至 ${task.deliverAdd}</div>
-			<div class="order-address"> 联系人${task.deliverName} 联系人电话${task.deliverAdd}</div>
+			<div class="order-address"> 联系人${task.deliverName} 联系人电话${task.phone}</div>
             <div class="order-actions">
                 ${actionButton}
               

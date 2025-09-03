@@ -2,6 +2,7 @@ package org.example.deliver_dish_backend.service;
 
 import org.example.deliver_dish_backend.model.dto.OrderDTO;
 import org.example.deliver_dish_backend.model.dto.OrderItemDTO;
+import org.example.deliver_dish_backend.model.dto.RestaurantSalesSummaryDTO;
 import org.example.deliver_dish_backend.model.entity.*;
 import org.example.deliver_dish_backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +167,7 @@ public class OrderService {
         List<Order> orders=orderRepository.findByRider_UserId(riderId);
         return orders.stream().map(order -> {
             OrderDTO dto = new OrderDTO();
+            dto.setDeliverAdd(order.getDeliverAdd());
             dto.setAddress(order.getRestaurant().getAddress());
             dto.setPhone(order.getPhone());
             dto.setDeliverName(order.getDeliverName());
@@ -335,9 +337,9 @@ public class OrderService {
      * @param restaurantId 餐厅ID
      * @param startDate 开始日期（可选）
      * @param endDate 结束日期（可选）
-     * @return 包含销售摘要信息的Map
+     * @return 包含销售摘要信息的DTO对象
      */
-    public Map<String, Object> getSalesSummary(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
+    public RestaurantSalesSummaryDTO getSalesSummary(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
         // 获取菜品销售统计
         List<Map<String, Object>> dishSales = getDishSalesStatistics(restaurantId, startDate, endDate);
         
@@ -353,11 +355,25 @@ public class OrderService {
         // 找出最畅销的菜品
         Map<String, Object> bestSellingDish = dishSales.isEmpty() ? null : dishSales.get(0);
         
+        // 创建并返回DTO对象
+        return new RestaurantSalesSummaryDTO(totalQuantity, totalRevenue, bestSellingDish, dishSales.size());
+    }
+    
+    /**
+     * 获取特定餐厅的销售统计摘要（兼容旧版本，返回Map格式）
+     * @param restaurantId 餐厅ID
+     * @param startDate 开始日期（可选）
+     * @param endDate 结束日期（可选）
+     * @return 包含销售摘要信息的Map
+     */
+    public Map<String, Object> getSalesSummaryAsMap(Long restaurantId, LocalDateTime startDate, LocalDateTime endDate) {
+        RestaurantSalesSummaryDTO summaryDTO = getSalesSummary(restaurantId, startDate, endDate);
+        
         Map<String, Object> summary = new HashMap<>();
-        summary.put("totalQuantity", totalQuantity);
-        summary.put("totalRevenue", totalRevenue);
-        summary.put("bestSellingDish", bestSellingDish);
-        summary.put("dishCount", dishSales.size());
+        summary.put("totalQuantity", summaryDTO.getTotalQuantity());
+        summary.put("totalRevenue", summaryDTO.getTotalRevenue());
+        summary.put("bestSellingDish", summaryDTO.getBestSellingDish());
+        summary.put("dishCount", summaryDTO.getDishCount());
         
         return summary;
     }
