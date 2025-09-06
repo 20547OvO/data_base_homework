@@ -68,13 +68,13 @@ public class ReviewService {
             throw new RuntimeException("无效的目标类型: " + reviewDTO.getTargetType());
         }
 
-        // 检查用户是否已经评价过该目标
-//        boolean hasReviewed = reviewRepository.existsByReviewer_UserIdAndTargetTypeAndTargetId(
-//                reviewDTO.getReviewerId(), targetType, reviewDTO.getTargetId());
-//
-//        if (hasReviewed) {
-//            throw new RuntimeException("您已经评价过该目标");
-//        }
+//         检查用户是否已经评价过该目标
+        boolean hasReviewed = reviewRepository.existsByReviewer_UserIdAndTargetTypeAndTargetId(
+                reviewDTO.getReviewerId(), targetType, reviewDTO.getTargetId());
+
+        if (hasReviewed) {
+            throw new RuntimeException("您已经评价过该目标");
+        }
         System.out.println("评价进行到这了");
 
         // 创建评价实体

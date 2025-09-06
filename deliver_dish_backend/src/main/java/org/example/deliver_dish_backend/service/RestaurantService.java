@@ -6,6 +6,7 @@ import org.example.deliver_dish_backend.model.entity.User;
 import org.example.deliver_dish_backend.repository.RestaurantRepository;
 import org.example.deliver_dish_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,6 +50,10 @@ public class RestaurantService {
         User owner = userRepository.findById(request.getOwnerId())
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         System.out.println("owneris"+owner);
+        if (restaurantRepository.findByName(request.getName()) != null) {
+            System.out.println("该餐馆已存在");
+            throw new RuntimeException();
+        }
 
         // 处理图片上传
         String imagePath = null;
